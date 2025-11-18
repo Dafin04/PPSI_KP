@@ -13,6 +13,9 @@
         <div class="bg-white shadow-sm rounded-lg p-6">
 
             <h3 class="text-lg font-medium text-gray-700 mb-5">Form Bimbingan Lengkap</h3>
+            <div class="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                Minimal {{ $minimumBimbingan }} bimbingan harus disetujui sebelum seminar dan unggah laporan akhir. Pastikan tanggal bimbingan tidak sama.
+            </div>
 
             @if(session('error'))
                 <div class="mb-4 text-red-600 font-medium">{{ session('error') }}</div>
@@ -59,10 +62,10 @@
 
                 <!-- Catatan -->
                 <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Catatan Tambahan</label>
-                    <textarea name="catatan" rows="3"
+                    <label class="block text-gray-700 font-medium mb-2">Catatan Pembahasan <span class="text-red-500">*</span></label>
+                    <textarea name="catatan" rows="3" required
                         class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Catatan tambahan (opsional)..."></textarea>
+                        placeholder="Tuliskan hasil tindak lanjut atau arahan dosen..."></textarea>
                 </div>
 
                 <!-- Metode -->
@@ -139,7 +142,7 @@
             const selectedDate = tanggalInput.value;
             if (existingDates.includes(selectedDate)) {
                 e.preventDefault();
-                alert('❌ Tanggal bimbingan ini sudah digunakan. Pilih tanggal lain.');
+                                alert('Tanggal bimbingan ini sudah digunakan. Pilih tanggal lain.'););
             }
         });
     });

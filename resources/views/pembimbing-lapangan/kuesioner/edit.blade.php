@@ -5,9 +5,32 @@
             <div class="bg-white shadow-sm border border-gray-200 rounded-xl">
                 <div class="p-6">
                     <form method="POST" action="{{ route('lapangan.kuesioner.update', $kuesioner) }}" class="space-y-4">@csrf @method('PUT')
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">Jumlah Kuota KP Tahun Depan</label>
+                                <input type="number" min="0" name="kuota_tahun_depan" value="{{ old('kuota_tahun_depan', $kuesioner->kuota_tahun_depan) }}" class="w-full border-gray-300 rounded-md" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">Tingkat Kepuasan</label>
+                                <select name="tingkat_kepuasan" class="w-full border-gray-300 rounded-md" required>
+                                    <option value="">Pilih</option>
+                                    @foreach(['puas' => 'Puas', 'tidak_puas' => 'Tidak Puas'] as $key => $label)
+                                        <option value="{{ $key }}" @selected(old('tingkat_kepuasan', $kuesioner->tingkat_kepuasan) === $key)>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                         <div>
-                            <label class="block text-sm text-gray-700 mb-1">Masukan/Feedback</label>
-                            <textarea name="isi_kuesioner" rows="6" class="w-full border-gray-300 rounded-md" required>{{ old('isi_kuesioner', $kuesioner->isi_kuesioner) }}</textarea>
+                            <label class="block text-sm text-gray-700 mb-1">Saran Kegiatan KP</label>
+                            <textarea name="saran_kegiatan" rows="3" class="w-full border-gray-300 rounded-md" required>{{ old('saran_kegiatan', $kuesioner->saran_kegiatan) }}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-700 mb-1">Kebutuhan Skill Mahasiswa</label>
+                            <textarea name="kebutuhan_skill" rows="3" class="w-full border-gray-300 rounded-md" required>{{ old('kebutuhan_skill', $kuesioner->kebutuhan_skill) }}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-700 mb-1">Masukan/Feedback Tambahan</label>
+                            <textarea name="isi_kuesioner" rows="4" class="w-full border-gray-300 rounded-md">{{ old('isi_kuesioner', $kuesioner->isi_kuesioner) }}</textarea>
                         </div>
                         <div class="flex justify-end gap-2">
                             <a href="{{ route('lapangan.kuesioner.index') }}" class="text-gray-600">Batal</a>

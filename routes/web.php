@@ -85,6 +85,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Monitoring & laporan
     Route::get('/monitoring', [AdminController::class, 'monitoring'])->name('monitoring');
+    Route::post('/kp/approve-all', [AdminController::class, 'approveAllKerjaPraktek'])->name('kp.approve-all');
+    Route::post('/kp/{kerjaPraktek}/hasil', [AdminController::class, 'tetapkanHasil'])->name('kp.hasil');
 });
 
 // Mahasiswa routes
@@ -96,13 +98,8 @@ Route::middleware(['auth', 'role:mahasiswa'])->prefix('mahasiswa')->name('mahasi
     Route::get('/kp/create', [MahasiswaController::class, 'createKP'])->name('kp.create');
     Route::post('/kp', [MahasiswaController::class, 'storeKP'])->name('kp.store');
 
-    // Proposal management
-    Route::get('/proposal', [MahasiswaController::class, 'indexProposal'])->name('proposal.index');
-    Route::get('/proposal/create', [MahasiswaController::class, 'createProposal'])->name('proposal.create');
-    Route::post('/proposal', [MahasiswaController::class, 'storeProposal'])->name('proposal.store');
-    Route::get('/proposal/{proposal}/edit', [MahasiswaController::class, 'editProposal'])->name('proposal.edit');
-    Route::put('/proposal/{proposal}', [MahasiswaController::class, 'updateProposal'])->name('proposal.update');
-    Route::delete('/proposal/{proposal}', [MahasiswaController::class, 'destroyProposal'])->name('proposal.destroy');
+    // Instansi & Lowongan
+    Route::get('/instansi', [MahasiswaController::class, 'indexInstansi'])->name('instansi.index');
 
     // Bimbingan management
     Route::get('/bimbingan', [MahasiswaController::class, 'indexBimbingan'])->name('bimbingan.index');
@@ -135,6 +132,7 @@ Route::middleware(['auth', 'role:mahasiswa'])->prefix('mahasiswa')->name('mahasi
     Route::get('/seminar', [MahasiswaController::class, 'indexSeminar'])->name('seminar.index');
     Route::get('/seminar/create', [MahasiswaController::class, 'createSeminar'])->name('seminar.create');
     Route::post('/seminar', [MahasiswaController::class, 'storeSeminar'])->name('seminar.store');
+    Route::post('/seminar/{seminar}/revisi', [MahasiswaController::class, 'uploadSeminarRevision'])->name('seminar.revisi');
 });
 
 // Dosen routes
@@ -164,6 +162,9 @@ Route::middleware(['auth', 'role:dosen'])->prefix('dosen')->name('dosen.')->grou
     // Penguji Seminar
     Route::get('/seminar', [DosenController::class, 'indexSeminar'])->name('seminar.index');
     Route::post('/seminar/{seminar}', [DosenController::class, 'updateSeminar'])->name('seminar.update');
+    Route::post('/seminar/{seminar}/approve', [DosenController::class, 'approveSeminar'])->name('seminar.approve');
+    Route::post('/seminar/{seminar}/revisi', [DosenController::class, 'requestSeminarRevision'])->name('seminar.revisi');
+    Route::post('/seminar/{seminar}/revisi/approve', [DosenController::class, 'approveSeminarRevision'])->name('seminar.revisi.approve');
 });
 
 // Pembimbing Lapangan routes

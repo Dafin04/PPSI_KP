@@ -33,6 +33,13 @@ class Seminar extends Model
         'nilai_pembimbing',
         'nilai_akhir_seminar',
         'catatan_penilaian',
+        'catatan_revisi',
+        'status_revisi',
+        'file_revisi_path',
+        'revisi_disetujui_at',
+        'nilai_penguji_angka',
+        'nilai_penguji_huruf',
+        'nilai_penguji_input_at',
         'status',
         'lolos',
         'alasan_tidak_lolos',
@@ -50,7 +57,10 @@ class Seminar extends Model
         'nilai_anggota_1' => 'decimal:2',
         'nilai_anggota_2' => 'decimal:2',
         'nilai_pembimbing' => 'decimal:2',
-        'nilai_akhir_seminar' => 'decimal:2'
+        'nilai_akhir_seminar' => 'decimal:2',
+        'nilai_penguji_angka' => 'decimal:2',
+        'revisi_disetujui_at' => 'datetime',
+        'nilai_penguji_input_at' => 'datetime',
     ];
 
     // Relationships
@@ -155,5 +165,47 @@ class Seminar extends Model
     public function canStart()
     {
         return $this->status === 'dijadwalkan' && $this->tanggal_seminar <= now()->toDateString();
+    }
+
+    public function needsRevision(): bool
+    {
+        return $this->status_revisi === 'butuh_revisi';
+    }
+
+    public function markRevisionRequest(string $catatan): void
+    {
+        $this->catatan_revisi = $catatan;
+        $this->status_revisi = 'butuh_revisi';
+        $this->revisi_disetujui_at = null;
+        $this->save();
+    }
+
+    public function markRevisionUploaded(string $path): void
+    {
+        $this->file_revisi_path = $path;
+        $this->status_revisi = 'menunggu_persetujuan';
+        $this->save();
+    }
+
+    public function approveRevision(): void
+    {
+        $this->status_revisi = 'disetujui';
+        $this->revisi_disetujui_at = now();
+        $this->save();
+    }
+
+    public function setPengujiGrade(?float $angka, ?string $huruf): void
+    {
+        if ($angka !== null) {
+            $this->nilai_penguji_angka = $angka;
+        }
+        if ($huruf !== null) {
+            $this->nilai_penguji_huruf = strtoupper($huruf);
+        }
+        if ($angka !== null || $huruf !== null) {
+            $this->nilai_penguji_input_at = now();
+        }
+
+        $this->save();
     }
 }

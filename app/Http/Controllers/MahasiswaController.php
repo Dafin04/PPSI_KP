@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use App\Models\Mahasiswa;
 use App\Models\KerjaPraktek;
 use App\Models\Seminar;
@@ -15,9 +16,28 @@ use App\Models\Nilai;
 use App\Models\Kuesioner;
 use App\Models\Instansi;
 use App\Models\Dosen;
+use App\Models\Lowongan;
 
 class MahasiswaController extends Controller
 {
+    public const MIN_BIMBINGAN = 10;
+
+    private function approvedBimbinganCount(?Mahasiswa $mahasiswa): int
+    {
+        if (!$mahasiswa) {
+            return 0;
+        }
+
+        return Bimbingan::where('mahasiswa_id', $mahasiswa->id)
+            ->where('status', 'disetujui')
+            ->count();
+    }
+
+    private function hasCompletedBimbingan(?Mahasiswa $mahasiswa): bool
+    {
+        return $this->approvedBimbinganCount($mahasiswa) >= self::MIN_BIMBINGAN;
+    }
+
     // ======================
     // DASHBOARD
     // ======================
@@ -50,105 +70,43 @@ class MahasiswaController extends Controller
     }
 
     // ======================
-    // PROPOSAL CRUD
-    // ======================
-    public function indexProposal()
-    {
-        $mahasiswa = auth()->user()->mahasiswa;
-        $proposals = $mahasiswa ? $mahasiswa->proposals()->latest()->get() : collect();
-        return view('mahasiswa.proposal.index', compact('proposals'));
-    }
-
-    public function createProposal()
-    {
-        return view('mahasiswa.proposal.create');
-    }
-
-    public function storeProposal(Request $request)
-    {
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'file_proposal' => 'required|file|mimes:pdf,doc,docx|max:2048',
-            'status' => 'required|in:draft,diajukan,disetujui,ditolak',
-        ]);
-
-        $mahasiswa = auth()->user()->mahasiswa;
-        $filePath = $request->file('file_proposal')->store('proposals', 'public');
-
-        Proposal::create([
-            'mahasiswa_id' => $mahasiswa->id,
-            'judul' => $validated['judul'],
-            'file_proposal' => $filePath,
-            'status' => $validated['status'],
-            'status_validasi' => 'belum divalidasi',
-            'tanggal_upload' => now(),
-        ]);
-
-        return redirect()->route('mahasiswa.proposal.index')->with('success', 'Proposal berhasil dibuat.');
-    }
-
-    public function editProposal(Proposal $proposal)
-    {
-        return view('mahasiswa.proposal.edit', compact('proposal'));
-    }
-
-    public function updateProposal(Request $request, Proposal $proposal)
-    {
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'file_proposal' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'status' => 'required|in:draft,diajukan,disetujui,ditolak',
-        ]);
-
-        if ($request->hasFile('file_proposal')) {
-            if ($proposal->file_proposal) {
-                Storage::disk('public')->delete($proposal->file_proposal);
-            }
-            $proposal->file_proposal = $request->file('file_proposal')->store('proposals', 'public');
-        }
-
-        $proposal->update([
-            'judul' => $validated['judul'],
-            'status' => $validated['status'],
-            'status_validasi' => $validated['status'],
-        ]);
-
-        return redirect()->route('mahasiswa.proposal.index')->with('success', 'Proposal berhasil diperbarui.');
-    }
-
-    public function destroyProposal(Proposal $proposal)
-    {
-        if ($proposal->file_proposal) {
-            Storage::disk('public')->delete($proposal->file_proposal);
-        }
-        $proposal->delete();
-
-        return redirect()->route('mahasiswa.proposal.index')->with('success', 'Proposal berhasil dihapus.');
-    }
-
-    // ======================
     // LAPORAN CRUD
     // ======================
     public function indexLaporan()
     {
         $mahasiswa = auth()->user()->mahasiswa;
         $laporans = $mahasiswa ? $mahasiswa->laporans()->latest()->get() : collect();
-        return view('mahasiswa.laporan.index', compact('laporans'));
+        $canUploadFinal = $this->hasCompletedBimbingan($mahasiswa);
+
+        return view('mahasiswa.laporan.index', compact('laporans', 'canUploadFinal'));
     }
 
     public function createLaporan()
     {
+        $mahasiswa = auth()->user()->mahasiswa;
+
+        if (!$this->hasCompletedBimbingan($mahasiswa)) {
+            return redirect()->route('mahasiswa.laporan.index')
+                ->with('error', 'Minimal ' . self::MIN_BIMBINGAN . ' bimbingan disetujui sebelum unggah laporan akhir.');
+        }
+
         return view('mahasiswa.laporan.create');
     }
 
     public function storeLaporan(Request $request)
     {
+        $mahasiswa = auth()->user()->mahasiswa;
+
+        if (!$this->hasCompletedBimbingan($mahasiswa)) {
+            return redirect()->route('mahasiswa.laporan.index')
+                ->with('error', 'Lengkapi minimal ' . self::MIN_BIMBINGAN . ' bimbingan disetujui sebelum unggah laporan.');
+        }
+
         $validated = $request->validate([
             'file_laporan' => 'required|file|mimes:pdf,doc,docx|max:2048',
             'status' => 'required|in:draft,diajukan,disetujui,ditolak',
         ]);
 
-        $mahasiswa = auth()->user()->mahasiswa;
         $filePath = $request->file('file_laporan')->store('laporans', 'public');
 
         Laporan::create([
@@ -255,27 +213,47 @@ class MahasiswaController extends Controller
         $mahasiswa = auth()->user()->mahasiswa;
         $bimbingans = $mahasiswa ? $mahasiswa->bimbingans()->latest()->get() : collect();
         $dosens = Dosen::all();
+        $approvedBimbinganCount = $this->approvedBimbinganCount($mahasiswa);
 
-        return view('mahasiswa.bimbingan.index', compact('bimbingans', 'dosens'));
+        $minimumBimbingan = self::MIN_BIMBINGAN;
+
+        return view('mahasiswa.bimbingan.index', compact('bimbingans', 'dosens', 'approvedBimbinganCount', 'minimumBimbingan'));
     }
 
     public function createBimbingan()
     {
         $mahasiswa = auth()->user()->mahasiswa;
+        if (!$mahasiswa) {
+            return redirect()->route('mahasiswa.dashboard')->with('error', 'Profil mahasiswa belum lengkap.');
+        }
+
         $proposals = Proposal::where('mahasiswa_id', $mahasiswa->id)->get();
         $existingDates = Bimbingan::where('mahasiswa_id', $mahasiswa->id)->pluck('tanggal_bimbingan')->toArray();
 
-        return view('mahasiswa.bimbingan.create', compact('proposals', 'existingDates'));
+        $minimumBimbingan = self::MIN_BIMBINGAN;
+
+        return view('mahasiswa.bimbingan.create', compact('proposals', 'existingDates', 'minimumBimbingan'));
     }
 
     public function storeBimbingan(Request $request)
     {
+        $mahasiswa = auth()->user()->mahasiswa;
+
+        if (!$mahasiswa) {
+            return redirect()->route('mahasiswa.bimbingan.index')->with('error', 'Profil mahasiswa belum lengkap.');
+        }
+
         $request->validate([
             'proposal_id' => 'required|exists:proposals,id',
-            'tanggal_bimbingan' => 'required|date',
+            'tanggal_bimbingan' => [
+                'required',
+                'date',
+                Rule::unique('bimbingans', 'tanggal_bimbingan')
+                    ->where(fn ($query) => $query->where('mahasiswa_id', $mahasiswa->id)),
+            ],
             'topik_bimbingan' => 'required|string',
             'hasil_bimbingan' => 'required|string',
-            'catatan' => 'nullable|string',
+            'catatan' => 'required|string',
             'metode' => 'nullable|string',
             'durasi_menit' => 'nullable|integer',
             'file_lampiran' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg|max:2048',
@@ -283,8 +261,6 @@ class MahasiswaController extends Controller
             'feedback_mahasiswa' => 'nullable|string',
             'status' => 'nullable|string'
         ]);
-
-        $mahasiswa = auth()->user()->mahasiswa;
 
         $proposal = Proposal::find($request->proposal_id);
         $dosenPembimbingId = $proposal->dosen_id ?? null;
@@ -312,6 +288,15 @@ class MahasiswaController extends Controller
             'feedback_mahasiswa' => $request->feedback_mahasiswa,
             'status' => $request->status ?? 'menunggu',
         ]);
+
+        if ($proposal->kerja_praktek_id) {
+            $kp = KerjaPraktek::find($proposal->kerja_praktek_id);
+            if ($kp) {
+                $jumlah = Bimbingan::where('kerja_praktek_id', $kp->id)->count();
+                $kp->jumlah_bimbingan = $jumlah;
+                $kp->save();
+            }
+        }
 
         return redirect()->route('mahasiswa.bimbingan.index')->with('success', 'Data bimbingan berhasil disimpan.');
     }
@@ -357,5 +342,177 @@ class MahasiswaController extends Controller
         $bimbingan->delete();
 
         return redirect()->route('mahasiswa.bimbingan.index')->with('success', 'Bimbingan berhasil dihapus.');
+    }
+
+    // ======================
+    // INSTANSI CRUD
+    // ======================
+    public function indexInstansi()
+    {
+        $instansis = Instansi::with('kuotas')->orderBy('nama_instansi')->get();
+        $lowonganAktif = Lowongan::with('instansi')->orderBy('tanggal_mulai')->get();
+
+        return view('mahasiswa.instansi.index', compact('instansis', 'lowonganAktif'));
+    }
+
+    public function createInstansi()
+    {
+        return view('mahasiswa.instansi.create');
+    }
+
+    public function storeInstansi(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_instansi' => 'required|string|max:255',
+            'alamat' => 'required|string',
+            'kontak' => 'nullable|string',
+            'telepon' => 'nullable|string',
+            'kontak_person' => 'nullable|string',
+            'jenis_instansi' => 'nullable|string',
+            'kota' => 'nullable|string',
+            'provinsi' => 'nullable|string',
+            'kode_pos' => 'nullable|string',
+            'email' => 'nullable|email',
+            'website' => 'nullable|url',
+        ]);
+
+        Instansi::create([
+            'nama_instansi' => $validated['nama_instansi'],
+            'alamat' => $validated['alamat'],
+            'kontak' => $validated['kontak'],
+            'telepon' => $validated['telepon'],
+            'kontak_person' => $validated['kontak_person'],
+            'jenis_instansi' => $validated['jenis_instansi'],
+            'kota' => $validated['kota'],
+            'provinsi' => $validated['provinsi'],
+            'kode_pos' => $validated['kode_pos'],
+            'email' => $validated['email'],
+            'website' => $validated['website'],
+            'status' => false, // default inactive until verified
+            'status_verifikasi' => 'belum divalidasi',
+        ]);
+
+        return redirect()->route('mahasiswa.dashboard')->with('success', 'Usulan instansi berhasil diajukan dan menunggu verifikasi admin.');
+    }
+
+    // ======================
+    // SEMINAR
+    // ======================
+    public function indexSeminar()
+    {
+        $user = auth()->user();
+        $seminars = Seminar::with(['ketuaPenguji', 'pembimbingPenguji'])
+            ->where('mahasiswa_id', $user->id)
+            ->orderByDesc('created_at')
+            ->get();
+        $mahasiswa = $user->mahasiswa;
+        $approvedBimbinganCount = $this->approvedBimbinganCount($mahasiswa);
+
+        return view('mahasiswa.seminar.index', compact('seminars', 'approvedBimbinganCount'));
+    }
+
+    public function createSeminar()
+    {
+        $mahasiswa = auth()->user()->mahasiswa;
+
+        if (!$this->hasCompletedBimbingan($mahasiswa)) {
+            return redirect()->route('mahasiswa.seminar.index')
+                ->with('error', 'Minimal ' . self::MIN_BIMBINGAN . ' bimbingan disetujui sebelum mengajukan seminar.');
+        }
+
+        $instansis = Instansi::aktif()->orderBy('nama_instansi')->get();
+
+        return view('mahasiswa.seminar.create', compact('instansis'));
+    }
+
+    public function storeSeminar(Request $request)
+    {
+        $user = auth()->user();
+        $mahasiswa = $user->mahasiswa;
+
+        if (!$this->hasCompletedBimbingan($mahasiswa)) {
+            return redirect()->route('mahasiswa.seminar.index')
+                ->with('error', 'Minimal ' . self::MIN_BIMBINGAN . ' bimbingan disetujui sebelum mengajukan seminar.');
+        }
+
+        $validated = $request->validate([
+            'judul_seminar' => 'required|string|max:255',
+            'abstrak' => 'nullable|string',
+            'tanggal_seminar' => 'required|date|after_or_equal:today',
+            'waktu_mulai' => 'required|date_format:H:i',
+            'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
+            'metode' => 'required|in:offline,online',
+            'tempat' => 'nullable|string|max:255',
+            'link_online' => 'nullable|url',
+            'presentasi_file' => 'nullable|file|mimes:ppt,pptx,pdf|max:5120',
+            'opsi_kelanjutan' => 'nullable|in:lanjut,ganti',
+            'judul_kp_baru' => 'required_if:opsi_kelanjutan,ganti|string|max:255',
+            'instansi_id_baru' => 'nullable|exists:instansis,id',
+        ]);
+
+        $kerjaPraktek = KerjaPraktek::where('mahasiswa_id', $user->id)
+            ->orderByDesc('created_at')
+            ->firstOrFail();
+
+        if (($validated['opsi_kelanjutan'] ?? 'lanjut') === 'ganti') {
+            $kerjaPraktek->judul_kp = $validated['judul_kp_baru'];
+            if (!empty($validated['instansi_id_baru'])) {
+                $kerjaPraktek->instansi_id = $validated['instansi_id_baru'];
+            }
+            $kerjaPraktek->save();
+        }
+
+        $presentasiPath = null;
+        if ($request->hasFile('presentasi_file')) {
+            $presentasiPath = $request->file('presentasi_file')->store('seminar/presentasi', 'public');
+        }
+
+        Seminar::create([
+            'kerja_praktek_id' => $kerjaPraktek->id,
+            'mahasiswa_id' => $user->id,
+            'judul_seminar' => $validated['judul_seminar'],
+            'abstrak' => $validated['abstrak'] ?? null,
+            'tanggal_seminar' => $validated['tanggal_seminar'],
+            'waktu_mulai' => $validated['waktu_mulai'],
+            'waktu_selesai' => $validated['waktu_selesai'],
+            'tempat' => $validated['tempat'] ?? null,
+            'metode' => $validated['metode'],
+            'link_online' => $validated['link_online'] ?? null,
+            'presentasi_file' => $presentasiPath,
+            'status' => 'diajukan',
+            'status_revisi' => 'belum_dikirim',
+        ]);
+
+        return redirect()->route('mahasiswa.seminar.index')->with('success', 'Pengajuan seminar berhasil dikirim dan menunggu verifikasi dosen pembimbing.');
+    }
+
+    public function uploadSeminarRevision(Request $request, Seminar $seminar)
+    {
+        $user = auth()->user();
+
+        if ($seminar->mahasiswa_id !== $user->id) {
+            abort(403, 'Anda tidak berhak mengunggah revisi untuk seminar ini.');
+        }
+
+        if (!$seminar->needsRevision()) {
+            return back()->with('error', 'Tidak ada permintaan revisi untuk seminar ini.');
+        }
+
+        if (!$this->hasCompletedBimbingan($user->mahasiswa)) {
+            return back()->with('error', 'Pastikan minimal ' . self::MIN_BIMBINGAN . ' bimbingan disetujui sebelum mengunggah revisi.');
+        }
+
+        $validated = $request->validate([
+            'file_revisi' => 'required|file|mimes:pdf,doc,docx|max:5120',
+        ]);
+
+        if ($seminar->file_revisi_path) {
+            Storage::disk('public')->delete($seminar->file_revisi_path);
+        }
+
+        $path = $request->file('file_revisi')->store('seminar/revisi', 'public');
+        $seminar->markRevisionUploaded($path);
+
+        return back()->with('success', 'File revisi berhasil diunggah dan menunggu persetujuan dosen penguji.');
     }
 }

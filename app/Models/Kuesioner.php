@@ -20,6 +20,17 @@ class Kuesioner extends Model
         'pertanyaan',
         'jawaban',
         'status',
+        'kuota_tahun_depan',
+        'saran_kegiatan',
+        'kebutuhan_skill',
+        'tingkat_kepuasan',
+        'sertifikat_path',
+        'sertifikat_dibuat_pada',
+    ];
+
+    protected $casts = [
+        'kuota_tahun_depan' => 'integer',
+        'sertifikat_dibuat_pada' => 'datetime',
     ];
 
     public function mahasiswa()
@@ -30,5 +41,10 @@ class Kuesioner extends Model
     public function pembimbingLapangan()
     {
         return $this->belongsTo(User::class, 'pembimbing_lapangan_id');
+    }
+
+    public function hasCertificate(): bool
+    {
+        return !empty($this->sertifikat_path);
     }
 }

@@ -448,11 +448,23 @@ class AdminController extends Controller
     }
 
     // Alokasi Dosen Pembimbing
-    public function alokasiPembimbing()
+    public function alokasiPembimbing(Request $request)
     {
-        $kps = KerjaPraktek::with(['mahasiswa', 'dosenPembimbing', 'instansi'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $query = KerjaPraktek::with(['mahasiswa.mahasiswa', 'dosenPembimbing', 'instansi']);
+
+        if ($request->filled('instansi_id')) {
+            $query->where('instansi_id', $request->instansi_id);
+        }
+
+        if ($request->get('sort') === 'ipk') {
+            $query->leftJoin('mahasiswas', 'mahasiswas.user_id', '=', 'kerja_prakteks.mahasiswa_id')
+                ->select('kerja_prakteks.*', 'mahasiswas.ipk as mahasiswa_ipk')
+                ->orderByDesc('mahasiswas.ipk');
+        } else {
+            $query->orderBy('kerja_prakteks.created_at', 'desc');
+        }
+
+        $kps = $query->paginate(15)->withQueryString();
         $dosens = User::where('status_aktif', true)
             ->whereHas('roles', function ($q) {
                 $q->whereIn('slug', ['dosen']);
@@ -460,7 +472,13 @@ class AdminController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('admin.alokasi.pembimbing', compact('kps', 'dosens'));
+        $instansis = Instansi::orderBy('nama_instansi')->get();
+        $filters = [
+            'instansi_id' => $request->input('instansi_id'),
+            'sort' => $request->input('sort'),
+        ];
+
+        return view('admin.alokasi.pembimbing', compact('kps', 'dosens', 'instansis', 'filters'));
     }
 
     public function setPembimbing(Request $request, KerjaPraktek $kerjaPraktek)
@@ -473,7 +491,8 @@ class AdminController extends Controller
 
         // Jika KP masih diajukan, anggap penetapan pembimbing sebagai persetujuan
         if ($kerjaPraktek->status === 'diajukan') {
-            $kerjaPraktek->update(['status' => 'disetujui']);
+            $kerjaPraktek->update(['status' => 'berlangsung']);
+            $kerjaPraktek->updateProgress('kp_dimulai');
         }
 
         // Sinkronkan juga proposal mahasiswa tersebut agar terindeks di dashboard dosen
@@ -534,9 +553,42 @@ class AdminController extends Controller
             'pembimbing_penguji_id' => 'nullable|exists:users,id',
         ]);
 
+        $selected = collect($validated)->filter();
+        if ($selected->duplicates()->isNotEmpty()) {
+            return back()->with('error', 'Setiap dosen penguji harus unik.');
+        }
+
+        $pembimbingId = optional($seminar->kerjaPraktek)->dosen_pembimbing_id;
+        if ($pembimbingId && $selected->contains($pembimbingId)) {
+            return back()->with('error', 'Dosen pembimbing tidak boleh menjadi penguji.');
+        }
+
         $seminar->update($validated);
 
         return back()->with('success', 'Penguji seminar berhasil diperbarui.');
+    }
+
+    public function approveAllKerjaPraktek()
+    {
+        $kps = KerjaPraktek::where('status', 'diajukan')->get();
+
+        foreach ($kps as $kp) {
+            $kp->update(['status' => 'berlangsung']);
+            $kp->updateProgress('kp_dimulai');
+        }
+
+        return back()->with('success', 'Seluruh pengajuan KP sudah disetujui dan otomatis dimulai.');
+    }
+
+    public function tetapkanHasil(Request $request, KerjaPraktek $kerjaPraktek)
+    {
+        $validated = $request->validate([
+            'hasil_akhir' => 'required|in:lulus,tidak_lulus',
+        ]);
+
+        $kerjaPraktek->tetapkanHasilAkhir($validated['hasil_akhir']);
+
+        return back()->with('success', 'Hasil akhir KP berhasil diperbarui.');
     }
 
     // Monitoring & Laporan

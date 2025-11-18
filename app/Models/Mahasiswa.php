@@ -14,6 +14,10 @@ class Mahasiswa extends Model
         'nim',
         'prodi',
         'angkatan',
+        'ipk',
+        'prestasi_akademik',
+        'prestasi_non_akademik',
+        'pengalaman_si',
     ];
 
     public function user()

@@ -21,6 +21,10 @@
                     </div>
                 @endif
 
+                <div class="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                    Progres bimbingan disetujui: <strong>{{ $approvedBimbinganCount }}/{{ $minimumBimbingan }}</strong>. Minimal {{ $minimumBimbingan }} bimbingan disetujui diperlukan sebelum pengajuan seminar dan unggah laporan akhir.
+                </div>
+
                 @if($bimbingans->isEmpty())
                     <p class="text-gray-500">Belum ada data bimbingan.</p>
                 @else

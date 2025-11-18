@@ -13,6 +13,7 @@
                                 <th class="px-4 py-2 text-left">Lapangan</th>
                                 <th class="px-4 py-2 text-left">Seminar</th>
                                 <th class="px-4 py-2 text-left">Total</th>
+                                <th class="px-4 py-2 text-left">Huruf</th>
                                 <th class="px-4 py-2"></th>
                             </tr></thead>
                             <tbody class="divide-y divide-gray-100">
@@ -23,6 +24,7 @@
                                     <td class="px-4 py-2">{{ $n->nilai_lapangan }}</td>
                                     <td class="px-4 py-2">{{ $n->nilai_seminar }}</td>
                                     <td class="px-4 py-2">{{ $n->total_nilai }}</td>
+                                    <td class="px-4 py-2 font-semibold">{{ $n->nilai_huruf }}</td>
                                     <td class="px-4 py-2 text-right">
                                         <a href="{{ route('dosen.nilai.edit', $n) }}" class="text-indigo-600 hover:underline">Edit</a>
                                     </td>
@@ -38,4 +40,3 @@
         </div>
     </div>
 </x-app-layout>
-

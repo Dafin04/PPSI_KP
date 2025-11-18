@@ -11,6 +11,44 @@
                             <div><label class="block text-sm">Nilai Seminar</label><input name="nilai_seminar" type="number" step="0.01" value="{{ $nilai->nilai_seminar }}" class="w-full border-gray-300 rounded-md" /></div>
                             <div><label class="block text-sm">Total Nilai</label><input name="total_nilai" type="number" step="0.01" value="{{ $nilai->total_nilai }}" class="w-full border-gray-300 rounded-md" /></div>
                         </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm">Huruf Pembimbing</label>
+                                <select name="nilai_pembimbing_huruf" class="w-full border-gray-300 rounded-md">
+                                    <option value="">--</option>
+                                    @foreach(['A','B','C','D'] as $huruf)
+                                        <option value="{{ $huruf }}" @selected($nilai->nilai_pembimbing_huruf === $huruf)>{{ $huruf }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm">Huruf Lapangan</label>
+                                <select name="nilai_lapangan_huruf" class="w-full border-gray-300 rounded-md">
+                                    <option value="">--</option>
+                                    @foreach(['A','B','C','D'] as $huruf)
+                                        <option value="{{ $huruf }}" @selected($nilai->nilai_lapangan_huruf === $huruf)>{{ $huruf }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm">Huruf Seminar</label>
+                                <select name="nilai_seminar_huruf" class="w-full border-gray-300 rounded-md">
+                                    <option value="">--</option>
+                                    @foreach(['A','B','C','D'] as $huruf)
+                                        <option value="{{ $huruf }}" @selected($nilai->nilai_seminar_huruf === $huruf)>{{ $huruf }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm">Huruf Total</label>
+                                <select name="nilai_mutu" class="w-full border-gray-300 rounded-md">
+                                    <option value="">--</option>
+                                    @foreach(['A','B','C','D'] as $huruf)
+                                        <option value="{{ $huruf }}" @selected($nilai->nilai_mutu === $huruf)>{{ $huruf }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                         <div class="flex justify-end gap-2">
                             <a href="{{ route('dosen.nilai.index') }}" class="text-gray-600">Batal</a>
                             <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">Simpan</button>
@@ -21,4 +59,3 @@
         </div>
     </div>
 </x-app-layout>
-

@@ -16,6 +16,7 @@ use App\Models\Mahasiswa;
 
 class KerjaPraktekController extends Controller
 {
+    private const MIN_BIMBINGAN = 10;
     /**
      * Display a listing of KP registrations
      */
@@ -226,6 +227,7 @@ class KerjaPraktekController extends Controller
         }
 
         $kerjaPraktek->update(['status' => 'diajukan']);
+        $kerjaPraktek->updateProgress('menunggu');
 
         // Sinkronkan proposal agar muncul di Validasi Proposal dosen pembimbing
         try {
@@ -271,7 +273,8 @@ class KerjaPraktekController extends Controller
             abort(403, 'Tidak memiliki akses untuk menyetujui');
         }
 
-        $kerjaPraktek->update(['status' => 'disetujui']);
+        $kerjaPraktek->update(['status' => 'berlangsung']);
+        $kerjaPraktek->updateProgress('kp_dimulai');
 
         return back()->with('success', 'Pendaftaran KP berhasil disetujui');
     }
@@ -348,6 +351,10 @@ class KerjaPraktekController extends Controller
 
         if (!$kerjaPraktek->canUploadLaporan() || $kerjaPraktek->mahasiswa_id !== $user->id) {
             abort(403, 'Tidak dapat mengupload laporan');
+        }
+
+        if (!$this->hasMetBimbinganRequirement($kerjaPraktek)) {
+            abort(403, 'Lengkapi minimal ' . self::MIN_BIMBINGAN . ' bimbingan disetujui sebelum unggah laporan akhir.');
         }
 
         $request->validate([
@@ -440,5 +447,18 @@ class KerjaPraktekController extends Controller
         return $user->hasRole('admin') ||
                $kerjaPraktek->dosen_pembimbing_id === $user->id ||
                $kerjaPraktek->pengawas_lapangan_id === $user->id;
+    }
+
+    private function hasMetBimbinganRequirement(KerjaPraktek $kerjaPraktek): bool
+    {
+        $mahasiswa = Mahasiswa::where('user_id', $kerjaPraktek->mahasiswa_id)->first();
+
+        if (!$mahasiswa) {
+            return false;
+        }
+
+        return Bimbingan::where('mahasiswa_id', $mahasiswa->id)
+            ->where('status', 'disetujui')
+            ->count() >= self::MIN_BIMBINGAN;
     }
 }

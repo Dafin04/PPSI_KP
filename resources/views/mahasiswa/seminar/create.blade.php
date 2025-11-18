@@ -27,12 +27,47 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
+                            <label class="block text-sm text-gray-700 mb-1">Waktu Mulai</label>
+                            <input name="waktu_mulai" type="time" class="w-full border-gray-300 rounded-lg" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-700 mb-1">Waktu Selesai</label>
+                            <input name="waktu_selesai" type="time" class="w-full border-gray-300 rounded-lg" required />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
                             <label class="block text-sm text-gray-700 mb-1">Tempat (jika offline)</label>
                             <input name="tempat" type="text" class="w-full border-gray-300 rounded-lg" />
                         </div>
                         <div>
                             <label class="block text-sm text-gray-700 mb-1">Link (jika online)</label>
                             <input name="link_online" type="url" class="w-full border-gray-300 rounded-lg" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Opsi Kelanjutan Jika Tidak Lulus</label>
+                        <select name="opsi_kelanjutan" class="w-full border-gray-300 rounded-lg">
+                            <option value="lanjut">Melanjutkan KP yang sama</option>
+                            <option value="ganti">Ganti judul dan/atau instansi</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-700 mb-1">Judul KP Baru (opsional)</label>
+                            <input name="judul_kp_baru" type="text" class="w-full border-gray-300 rounded-lg" placeholder="Isi jika ingin mengganti judul" />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-700 mb-1">Instansi Baru (opsional)</label>
+                            <select name="instansi_id_baru" class="w-full border-gray-300 rounded-lg">
+                                <option value="">Tetap gunakan instansi saat ini</option>
+                                @foreach($instansis as $instansi)
+                                    <option value="{{ $instansi->id }}">{{ $instansi->nama_instansi }}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     <div>
@@ -48,4 +83,3 @@
         </div>
     </div>
 </x-app-layout>
-

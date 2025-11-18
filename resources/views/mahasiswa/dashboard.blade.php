@@ -25,8 +25,8 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <x-manage-card href="{{ route('kerja-praktek.create') }}" color="indigo" title="Daftar KP Baru" desc="Ajukan/pilih instansi" />
                     <x-manage-card href="{{ route('kerja-praktek.index') }}" color="amber" title="Status KP" desc="Lihat & ubah pengajuan" />
-                    <x-manage-card href="{{ route('mahasiswa.proposal.index') }}" color="blue" title="Proposal" desc="Unggah & kelola" />
                     <x-manage-card href="{{ route('mahasiswa.laporan.index') }}" color="emerald" title="Laporan Akhir" desc="Unggah & kelola" />
+                    <x-manage-card href="{{ route('mahasiswa.instansi.index') }}" color="cyan" title="Daftar Instansi" desc="Lihat kuota & lowongan" />
                 </div>
             </section>
         </div>

@@ -6,10 +6,16 @@ use App\Models\Nilai;
 use App\Models\Kuesioner;
 use App\Models\Kuota;
 use App\Models\Instansi;
+use App\Services\SertifikatKpGenerator;
 use Illuminate\Http\Request;
 
 class PembimbingLapanganController extends Controller
 {
+    public function __construct(
+        private SertifikatKpGenerator $sertifikatKpGenerator
+    ) {
+    }
+
     public function dashboard()
     {
         return view('pembimbing-lapangan.dashboard');
@@ -103,14 +109,37 @@ class PembimbingLapanganController extends Controller
     public function storeKuesioner(Request $request)
     {
         $validated = $request->validate([
-            'isi_kuesioner' => 'required|string',
+            'isi_kuesioner' => 'nullable|string',
+            'kuota_tahun_depan' => 'required|integer|min:0',
+            'saran_kegiatan' => 'required|string',
+            'kebutuhan_skill' => 'required|string',
+            'tingkat_kepuasan' => 'required|in:puas,tidak_puas',
         ]);
 
-        Kuesioner::create([
+        $kuesioner = Kuesioner::create([
             'pembimbing_lapangan_id' => auth()->id(),
             'mahasiswa_id' => null,
             'isi_kuesioner' => $validated['isi_kuesioner'],
             'tipe' => 'instansi',
+            'kuota_tahun_depan' => $validated['kuota_tahun_depan'],
+            'saran_kegiatan' => $validated['saran_kegiatan'],
+            'kebutuhan_skill' => $validated['kebutuhan_skill'],
+            'tingkat_kepuasan' => $validated['tingkat_kepuasan'],
+        ]);
+
+        $user = auth()->user();
+        $certificatePath = $this->sertifikatKpGenerator->generate([
+            'nama_pembimbing' => $user->name,
+            'nik' => $user->nip ?? $user->id,
+            'semester' => now()->month >= 7 ? 'Ganjil' : 'Genap',
+            'tahun' => now()->format('Y'),
+            'nama_kaprodi' => 'Kaprodi Sistem Informasi',
+            'instansi' => $user->fakultas ?? 'Mitra KP',
+        ]);
+
+        $kuesioner->update([
+            'sertifikat_path' => $certificatePath,
+            'sertifikat_dibuat_pada' => now(),
         ]);
 
         return redirect()->route('lapangan.kuesioner.index')->with('success', 'Kuesioner tersimpan.');

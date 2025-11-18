@@ -9,7 +9,11 @@ use App\Models\Nilai;
 use Illuminate\Http\Request;
 use App\Models\KerjaPraktek;
 use App\Models\Mahasiswa;
+use App\Models\Seminar;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Arr;
+use App\Notifications\SeminarApprovedNotification;
 
 class DosenController extends Controller
 {
@@ -173,9 +177,13 @@ class DosenController extends Controller
             'nilai_lapangan' => 'nullable|numeric|min:0|max:100',
             'nilai_seminar' => 'nullable|numeric|min:0|max:100',
             'total_nilai' => 'nullable|numeric|min:0|max:100',
+            'nilai_pembimbing_huruf' => 'nullable|in:A,B,C,D',
+            'nilai_lapangan_huruf' => 'nullable|in:A,B,C,D',
+            'nilai_seminar_huruf' => 'nullable|in:A,B,C,D',
+            'nilai_mutu' => 'nullable|in:A,B,C,D',
         ]);
 
-        Nilai::create([
+        $nilai = Nilai::create([
             'mahasiswa_id' => $validated['mahasiswa_id'],
             'dosen_id' => auth()->id(),
             'pembimbing_lapangan_id' => $validated['pembimbing_lapangan_id'],
@@ -183,6 +191,10 @@ class DosenController extends Controller
             'nilai_lapangan' => $validated['nilai_lapangan'],
             'nilai_seminar' => $validated['nilai_seminar'],
             'total_nilai' => $validated['total_nilai'],
+            'nilai_pembimbing_huruf' => $validated['nilai_pembimbing_huruf'] ?? Nilai::konversiHuruf($validated['nilai_pembimbing'] ?? null),
+            'nilai_lapangan_huruf' => $validated['nilai_lapangan_huruf'] ?? Nilai::konversiHuruf($validated['nilai_lapangan'] ?? null),
+            'nilai_seminar_huruf' => $validated['nilai_seminar_huruf'] ?? Nilai::konversiHuruf($validated['nilai_seminar'] ?? null),
+            'nilai_mutu' => $validated['nilai_mutu'] ?? Nilai::konversiHuruf($validated['total_nilai'] ?? null),
         ]);
 
         // Sinkronkan komponen nilai ke entitas KP agar nilai akhir terhitung
@@ -217,9 +229,27 @@ class DosenController extends Controller
             'nilai_lapangan' => 'nullable|numeric|min:0|max:100',
             'nilai_seminar' => 'nullable|numeric|min:0|max:100',
             'total_nilai' => 'nullable|numeric|min:0|max:100',
+            'nilai_pembimbing_huruf' => 'nullable|in:A,B,C,D',
+            'nilai_lapangan_huruf' => 'nullable|in:A,B,C,D',
+            'nilai_seminar_huruf' => 'nullable|in:A,B,C,D',
+            'nilai_mutu' => 'nullable|in:A,B,C,D',
         ]);
 
         $nilai->update($validated);
+
+        if (empty($validated['nilai_pembimbing_huruf'] ?? null) && array_key_exists('nilai_pembimbing', $validated)) {
+            $nilai->nilai_pembimbing_huruf = Nilai::konversiHuruf($validated['nilai_pembimbing']);
+        }
+        if (empty($validated['nilai_lapangan_huruf'] ?? null) && array_key_exists('nilai_lapangan', $validated)) {
+            $nilai->nilai_lapangan_huruf = Nilai::konversiHuruf($validated['nilai_lapangan']);
+        }
+        if (empty($validated['nilai_seminar_huruf'] ?? null) && array_key_exists('nilai_seminar', $validated)) {
+            $nilai->nilai_seminar_huruf = Nilai::konversiHuruf($validated['nilai_seminar']);
+        }
+        if (empty($validated['nilai_mutu'] ?? null) && array_key_exists('total_nilai', $validated)) {
+            $nilai->nilai_mutu = Nilai::konversiHuruf($validated['total_nilai']);
+        }
+        $nilai->save();
 
         // Sinkronkan ke KP
         $m = \App\Models\Mahasiswa::find($nilai->mahasiswa_id);
@@ -250,26 +280,113 @@ class DosenController extends Controller
     public function indexSeminar()
     {
         $uid = auth()->id();
-        $seminars = \App\Models\Seminar::where(function($q) use ($uid){
+        $seminars = Seminar::with('kerjaPraktek')->where(function($q) use ($uid){
             $q->where('ketua_penguji_id',$uid)
               ->orWhere('anggota_penguji_1_id',$uid)
               ->orWhere('anggota_penguji_2_id',$uid)
               ->orWhere('pembimbing_penguji_id',$uid);
-        })->orderByDesc('tanggal_seminar')->get();
+        })
+        ->where(function($q) {
+            $q->whereNull('lolos')->orWhere('lolos', false);
+        })
+        ->orderByDesc('tanggal_seminar')
+        ->get();
+
         return view('dosen.seminar.index', compact('seminars'));
     }
 
-    public function updateSeminar(Request $request, \App\Models\Seminar $seminar)
+    public function approveSeminar(Request $request, Seminar $seminar)
     {
+        $uid = auth()->id();
+        $isPembimbing = optional($seminar->kerjaPraktek)->dosen_pembimbing_id === $uid
+            || $seminar->pembimbing_penguji_id === $uid;
+
+        if (!$isPembimbing) {
+            abort(403, 'Hanya dosen pembimbing yang dapat menyetujui seminar.');
+        }
+
+        $seminar->update(['status' => 'dijadwalkan']);
+
+        if ($seminar->mahasiswa) {
+            $seminar->mahasiswa->notify(new SeminarApprovedNotification($seminar, 'disetujui'));
+        }
+
+        return back()->with('success', 'Seminar disetujui dan mahasiswa menerima notifikasi.');
+    }
+
+    public function requestSeminarRevision(Request $request, Seminar $seminar)
+    {
+        if (!$this->isPenguji($seminar, auth()->id())) {
+            abort(403, 'Hanya dosen penguji yang dapat memberikan revisi.');
+        }
+
+        $validated = $request->validate([
+            'catatan_revisi' => 'required|string',
+        ]);
+
+        $seminar->markRevisionRequest($validated['catatan_revisi']);
+
+        if ($seminar->mahasiswa) {
+            $seminar->mahasiswa->notify(new SeminarApprovedNotification($seminar, 'butuh_revisi'));
+        }
+
+        return back()->with('success', 'Catatan revisi disimpan.');
+    }
+
+    public function approveSeminarRevision(Seminar $seminar)
+    {
+        if (!$this->isPenguji($seminar, auth()->id())) {
+            abort(403, 'Hanya dosen penguji yang dapat menyetujui revisi.');
+        }
+
+        $seminar->approveRevision();
+
+        return back()->with('success', 'Revisi seminar telah disetujui.');
+    }
+
+    public function updateSeminar(Request $request, Seminar $seminar)
+    {
+        if (!$this->isPenguji($seminar, auth()->id())) {
+            abort(403, 'Hanya dosen penguji yang dapat menilai seminar.');
+        }
+
         $validated = $request->validate([
             'nilai_ketua_penguji' => 'nullable|numeric|min:0|max:100',
             'nilai_anggota_1' => 'nullable|numeric|min:0|max:100',
             'nilai_anggota_2' => 'nullable|numeric|min:0|max:100',
             'nilai_pembimbing' => 'nullable|numeric|min:0|max:100',
             'catatan_penilaian' => 'nullable|string',
+            'nilai_penguji_angka' => 'nullable|numeric|min:0|max:100',
+            'nilai_penguji_huruf' => 'nullable|in:A,B,C,D',
         ]);
-        $seminar->update($validated);
+
+        $nilaiPenguji = [
+            'angka' => $validated['nilai_penguji_angka'] ?? null,
+            'huruf' => $validated['nilai_penguji_huruf'] ?? null,
+        ];
+
+        $payload = Arr::except($validated, ['nilai_penguji_angka', 'nilai_penguji_huruf']);
+
+        $seminar->update($payload);
+
+        if (!is_null($nilaiPenguji['angka']) || !is_null($nilaiPenguji['huruf'])) {
+            $seminar->setPengujiGrade($nilaiPenguji['angka'], $nilaiPenguji['huruf']);
+        }
+
         $seminar->hitungNilaiAkhir();
-        return back()->with('success','Penilaian seminar diperbarui');
+
+        return back()->with('success', 'Penilaian seminar diperbarui');
+    }
+
+    private function isPenguji(Seminar $seminar, int $userId): bool
+    {
+        $pengujiIds = array_filter([
+            $seminar->ketua_penguji_id,
+            $seminar->anggota_penguji_1_id,
+            $seminar->anggota_penguji_2_id,
+            $seminar->pembimbing_penguji_id,
+        ]);
+
+        return in_array($userId, $pengujiIds, true);
     }
 }

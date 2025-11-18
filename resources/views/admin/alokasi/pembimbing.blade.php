@@ -15,11 +15,35 @@
                         </div>
                     @endif
 
+                    <form method="GET" class="flex flex-wrap gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Filter Instansi</label>
+                            <select name="instansi_id" class="border-gray-300 rounded-md">
+                                <option value="">Semua Instansi</option>
+                                @foreach($instansis as $instansi)
+                                    <option value="{{ $instansi->id }}" @selected(($filters['instansi_id'] ?? '') == $instansi->id)>{{ $instansi->nama_instansi }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Urutkan</label>
+                            <select name="sort" class="border-gray-300 rounded-md">
+                                <option value="">Terbaru</option>
+                                <option value="ipk" @selected(($filters['sort'] ?? '') === 'ipk')>IPK Tertinggi</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm">Terapkan</button>
+                            <a href="{{ route('admin.alokasi.pembimbing') }}" class="text-sm text-gray-600">Reset</a>
+                        </div>
+                    </form>
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full table-auto">
                             <thead>
                                 <tr class="bg-gray-50">
                                     <th class="px-4 py-2 text-left">Mahasiswa</th>
+                                    <th class="px-4 py-2 text-left">IPK</th>
                                     <th class="px-4 py-2 text-left">Instansi</th>
                                     <th class="px-4 py-2 text-left">Judul</th>
                                     <th class="px-4 py-2 text-left">Pembimbing</th>
@@ -30,6 +54,7 @@
                                 @foreach($kps as $kp)
                                     <tr class="border-t">
                                         <td class="px-4 py-2">{{ $kp->mahasiswa->name ?? '-' }}</td>
+                                        <td class="px-4 py-2">{{ optional($kp->mahasiswa->mahasiswa)->ipk ?? '-' }}</td>
                                         <td class="px-4 py-2">{{ $kp->instansi->nama_instansi ?? '-' }}</td>
                                         <td class="px-4 py-2">{{ $kp->judul_kp ?? '-' }}</td>
                                         <td class="px-4 py-2">{{ $kp->dosenPembimbing->name ?? 'Belum ditentukan' }}</td>
@@ -60,4 +85,3 @@
         </div>
     </div>
 </x-app-layout>
-

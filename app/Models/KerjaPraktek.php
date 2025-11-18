@@ -36,7 +36,11 @@ class KerjaPraktek extends Model
         'lolos_seminar',
         'catatan_seminar',
         'jumlah_bimbingan',
-        'riwayat_bimbingan'
+        'riwayat_bimbingan',
+        'progress_status',
+        'progress_status_updated_at',
+        'hasil_akhir',
+        'hasil_akhir_ditetapkan_at',
     ];
 
     protected $casts = [
@@ -48,7 +52,9 @@ class KerjaPraktek extends Model
         'riwayat_bimbingan' => 'array',
         'nilai_dosen_pembimbing' => 'decimal:2',
         'nilai_pengawas_lapangan' => 'decimal:2',
-        'nilai_akhir' => 'decimal:2'
+        'nilai_akhir' => 'decimal:2',
+        'progress_status_updated_at' => 'datetime',
+        'hasil_akhir_ditetapkan_at' => 'datetime',
     ];
 
     // Relationships
@@ -140,5 +146,23 @@ class KerjaPraktek extends Model
     public function seminar()
     {
         return $this->hasOne(Seminar::class);
+    }
+
+    public function updateProgress(string $nextStatus): void
+    {
+        $this->progress_status = $nextStatus;
+        $this->progress_status_updated_at = now();
+        $this->save();
+    }
+
+    public function tetapkanHasilAkhir(?string $hasil): void
+    {
+        if ($hasil === null) {
+            return;
+        }
+
+        $this->hasil_akhir = $hasil;
+        $this->hasil_akhir_ditetapkan_at = now();
+        $this->save();
     }
 }

@@ -10,10 +10,16 @@
 
             <!-- Tombol Upload -->
             <div class="flex justify-end">
-                <a href="{{ route('mahasiswa.laporan.create') }}"
-                   class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-white text-sm hover:bg-indigo-700">
-                    Unggah Laporan
-                </a>
+                @if($canUploadFinal)
+                    <a href="{{ route('mahasiswa.laporan.create') }}"
+                       class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-white text-sm hover:bg-indigo-700">
+                        Unggah Laporan
+                    </a>
+                @else
+                    <span class="inline-flex items-center rounded-lg bg-gray-200 px-4 py-2 text-gray-500 text-sm cursor-not-allowed" title="Lengkapi minimal 10 bimbingan disetujui terlebih dahulu">
+                        Unggah Laporan (terkunci)
+                    </span>
+                @endif
             </div>
 
             <!-- Notifikasi -->
@@ -27,6 +33,12 @@
                     {{ session('error') }}
                 </div>
             @endif
+
+            @unless($canUploadFinal)
+                <div class="rounded border border-yellow-200 bg-yellow-50 px-4 py-3 text-yellow-800">
+                    Minimal 10 bimbingan berstatus disetujui sebelum unggah revisi seminar dan laporan akhir.
+                </div>
+            @endunless
 
             @php
                 $hasNote = \Illuminate\Support\Facades\Schema::hasColumn('laporans', 'catatan_validasi');
