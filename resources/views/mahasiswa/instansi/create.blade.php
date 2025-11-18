@@ -13,7 +13,7 @@
                         Isi data instansi yang ingin diajukan. Setelah dikirim, admin/Kaprodi akan memverifikasi terlebih dahulu sebelum bisa dipilih oleh mahasiswa lain.
                     </p>
 
-                    <form action="{{ route('mahasiswa.instansi.store') }}" method="POST" class="space-y-5">
+                    <form action="{{ route('mahasiswa.instansi.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                         @csrf
 
                         <div class="grid grid-cols-1 gap-4">
@@ -86,6 +86,13 @@
                                 <textarea name="kontak" rows="2" class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">{{ old('kontak') }}</textarea>
                                 <x-input-error class="mt-1" :messages="$errors->get('kontak')" />
                             </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Proposal KP <span class="text-red-500">*</span></label>
+                            <input type="file" name="proposal_file" accept=".pdf,.doc,.docx" required class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                            <p class="mt-1 text-xs text-gray-500">Format PDF/DOC/DOCX, maksimal 5 MB.</p>
+                            <x-input-error class="mt-1" :messages="$errors->get('proposal_file')" />
                         </div>
 
                         <div class="flex justify-end gap-3">

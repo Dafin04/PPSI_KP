@@ -25,6 +25,8 @@ class Instansi extends Model
         'status',
         'status_aktif',
         'status_verifikasi',
+        'pengusul_mahasiswa_id',
+        'proposal_file_path',
     ];
 
     protected $casts = [

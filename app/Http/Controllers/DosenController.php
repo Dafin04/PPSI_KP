@@ -136,7 +136,7 @@ class DosenController extends Controller
     {
         $validated = $request->validate([
             'catatan' => 'nullable|string',
-            'status' => 'nullable|in:terjadwal,berlangsung,selesai,dibatalkan',
+            'status' => 'nullable|in:menunggu,disetujui,ditolak,terjadwal,berlangsung,selesai,dibatalkan',
             'feedback_dosen' => 'nullable|string',
         ]);
 

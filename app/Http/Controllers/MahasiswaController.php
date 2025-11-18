@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -17,6 +18,7 @@ use App\Models\Kuesioner;
 use App\Models\Instansi;
 use App\Models\Dosen;
 use App\Models\Lowongan;
+use App\Models\PendaftaranKP;
 
 class MahasiswaController extends Controller
 {
@@ -36,6 +38,23 @@ class MahasiswaController extends Controller
     private function hasCompletedBimbingan(?Mahasiswa $mahasiswa): bool
     {
         return $this->approvedBimbinganCount($mahasiswa) >= self::MIN_BIMBINGAN;
+    }
+
+    private function resolveMahasiswaProfile(): Mahasiswa
+    {
+        $user = auth()->user();
+
+        if ($user->mahasiswa) {
+            return $user->mahasiswa;
+        }
+
+        return Mahasiswa::create([
+            'user_id' => $user->id,
+            'nim' => $user->nim ?? '',
+            'prodi' => $user->jurusan ?? '',
+            'angkatan' => $user->angkatan ?? now()->year,
+            'ipk' => $user->ipk ?? null,
+        ]);
     }
 
     // ======================
@@ -273,8 +292,19 @@ class MahasiswaController extends Controller
             ? $request->file('file_lampiran')->store('lampiran_bimbingan', 'public')
             : null;
 
+        $kerjaPraktekId = $proposal->kerja_praktek_id;
+        if (!$kerjaPraktekId) {
+            $kerjaPraktekId = KerjaPraktek::where('mahasiswa_id', auth()->id())
+                ->orderByDesc('created_at')
+                ->value('id');
+        }
+
+        if (!$kerjaPraktekId) {
+            return back()->withInput()->with('error', 'Data KP mahasiswa belum ditemukan. Pastikan pengajuan KP sudah disetujui.');
+        }
+
         Bimbingan::create([
-            'kerja_praktek_id' => $proposal->kerja_praktek_id ?? null,
+            'kerja_praktek_id' => $kerjaPraktekId,
             'dosen_pembimbing_id' => $proposal->dosen_id ?? null,
             'mahasiswa_id' => $mahasiswa->id,
             'tanggal_bimbingan' => $request->tanggal_bimbingan,
@@ -374,23 +404,70 @@ class MahasiswaController extends Controller
             'kode_pos' => 'nullable|string',
             'email' => 'nullable|email',
             'website' => 'nullable|url',
+            'proposal_file' => 'required|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        Instansi::create([
-            'nama_instansi' => $validated['nama_instansi'],
-            'alamat' => $validated['alamat'],
-            'kontak' => $validated['kontak'],
-            'telepon' => $validated['telepon'],
-            'kontak_person' => $validated['kontak_person'],
-            'jenis_instansi' => $validated['jenis_instansi'],
-            'kota' => $validated['kota'],
-            'provinsi' => $validated['provinsi'],
-            'kode_pos' => $validated['kode_pos'],
-            'email' => $validated['email'],
-            'website' => $validated['website'],
-            'status' => false, // default inactive until verified
-            'status_verifikasi' => 'belum divalidasi',
-        ]);
+        $mahasiswaProfile = $this->resolveMahasiswaProfile();
+        $user = auth()->user();
+        $proposalPath = $request->file('proposal_file')->store('instansi/proposal', 'public');
+
+        DB::transaction(function () use ($validated, $mahasiswaProfile, $user, $proposalPath) {
+            $instansi = Instansi::create([
+                'nama_instansi' => $validated['nama_instansi'],
+                'alamat' => $validated['alamat'],
+                'kontak' => $validated['kontak'],
+                'telepon' => $validated['telepon'],
+                'kontak_person' => $validated['kontak_person'],
+                'jenis_instansi' => $validated['jenis_instansi'],
+                'kota' => $validated['kota'],
+                'provinsi' => $validated['provinsi'],
+                'kode_pos' => $validated['kode_pos'],
+                'email' => $validated['email'],
+                'website' => $validated['website'],
+                'status' => false,
+                'status_verifikasi' => 'belum divalidasi',
+                'pengusul_mahasiswa_id' => $mahasiswaProfile->id,
+                'proposal_file_path' => $proposalPath,
+            ]);
+
+            $defaultStart = now()->addWeek();
+            $kerjaPraktek = KerjaPraktek::firstOrCreate(
+                [
+                    'mahasiswa_id' => $user->id,
+                    'instansi_id' => $instansi->id,
+                ],
+                [
+                    'judul_kp' => 'Kerja Praktek ' . $instansi->nama_instansi,
+                    'deskripsi_kp' => 'Pengajuan otomatis KP pada ' . $instansi->nama_instansi,
+                    'status' => 'diajukan',
+                    'tanggal_mulai' => $defaultStart,
+                    'tanggal_selesai' => $defaultStart->copy()->addWeeks(8),
+                    'durasi_minggu' => 8,
+                    'pilihan_1' => $instansi->nama_instansi,
+                    'instansi_diterima' => $instansi->nama_instansi,
+                    'proposal_file' => $proposalPath,
+                ]
+            );
+
+            $kerjaPraktek->update([
+                'status' => 'diajukan',
+                'instansi_diterima' => $instansi->nama_instansi,
+                'proposal_file' => $proposalPath,
+            ]);
+            $kerjaPraktek->updateProgress('menunggu');
+
+            PendaftaranKP::updateOrCreate(
+                [
+                    'mahasiswa_id' => $mahasiswaProfile->id,
+                    'kerja_praktek_id' => $kerjaPraktek->id,
+                ],
+                [
+                    'status' => PendaftaranKP::STATUS_MENUNGGU,
+                    'tanggal_daftar' => now(),
+                    'jenis' => 'instansi',
+                ]
+            );
+        });
 
         return redirect()->route('mahasiswa.dashboard')->with('success', 'Usulan instansi berhasil diajukan dan menunggu verifikasi admin.');
     }

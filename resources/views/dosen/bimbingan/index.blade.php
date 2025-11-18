@@ -19,12 +19,17 @@
                                     <td class="px-4 py-2">{{ ($b->tanggal_bimbingan ?? $b->tanggal ?? $b->created_at)->format('d M Y') }}</td>
                                     <td class="px-4 py-2">{{ $b->mahasiswa->name ?? '-' }}</td>
                                     <td class="px-4 py-2">{{ $b->topik_bimbingan ?? $b->catatan ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $b->status ?? 'selesai' }}</td>
+                                    <td class="px-4 py-2 capitalize">{{ $b->status ?? 'selesai' }}</td>
                                     <td class="px-4 py-2">
                                         <div class="text-xs text-gray-600 mb-2">{{ $b->feedback_dosen ?? '-' }}</div>
-                                        <form method="POST" action="{{ route('dosen.bimbingan.update', $b) }}" class="flex items-center gap-2">@csrf @method('PUT')
-                                            <input name="feedback_dosen" type="text" placeholder="Tulis komentar" class="border-gray-300 rounded-md text-sm" />
-                                            <button class="text-indigo-600 hover:underline text-sm">Simpan</button>
+                                        <form method="POST" action="{{ route('dosen.bimbingan.update', $b) }}" class="flex flex-col gap-2 md:flex-row md:items-center">@csrf @method('PUT')
+                                            <select name="status" class="border-gray-300 rounded-md text-sm">
+                                                @foreach(['menunggu','disetujui','ditolak'] as $status)
+                                                    <option value="{{ $status }}" @selected(($b->status ?? 'menunggu') === $status)>{{ ucfirst($status) }}</option>
+                                                @endforeach
+                                            </select>
+                                            <input name="feedback_dosen" type="text" value="{{ old('feedback_dosen') }}" placeholder="Tulis komentar" class="border-gray-300 rounded-md text-sm flex-1" />
+                                            <button class="text-indigo-600 hover:underline text-sm whitespace-nowrap">Simpan</button>
                                         </form>
                                     </td>
                                 </tr>

@@ -10,6 +10,8 @@ use App\Models\KerjaPraktek;
 use App\Models\Seminar;
 use App\Models\Proposal;
 use App\Models\Role;
+use App\Models\Mahasiswa;
+use App\Models\PendaftaranKP;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
@@ -319,19 +321,29 @@ class AdminController extends Controller
     // Verifikasi instansi usulan
     public function verifyInstansi(Instansi $instansi)
     {
-        $instansi->status_verifikasi = 'disetujui';
-        if (Schema::hasColumn('instansis','status')) $instansi->status = true;
-        if (Schema::hasColumn('instansis','status_aktif')) $instansi->status_aktif = true;
-        $instansi->save();
-        return back()->with('success','Instansi disetujui.');
+        DB::transaction(function () use ($instansi) {
+            $instansi->status_verifikasi = 'disetujui';
+            if (Schema::hasColumn('instansis','status')) $instansi->status = true;
+            if (Schema::hasColumn('instansis','status_aktif')) $instansi->status_aktif = true;
+            $instansi->save();
+
+            $this->syncPengusulKerjaPraktek($instansi, true);
+        });
+
+        return back()->with('success','Instansi disetujui dan KP mahasiswa siap dialokasikan.');
     }
 
     public function rejectInstansi(Instansi $instansi)
     {
-        $instansi->status_verifikasi = 'ditolak';
-        if (Schema::hasColumn('instansis','status')) $instansi->status = false;
-        if (Schema::hasColumn('instansis','status_aktif')) $instansi->status_aktif = false;
-        $instansi->save();
+        DB::transaction(function () use ($instansi) {
+            $instansi->status_verifikasi = 'ditolak';
+            if (Schema::hasColumn('instansis','status')) $instansi->status = false;
+            if (Schema::hasColumn('instansis','status_aktif')) $instansi->status_aktif = false;
+            $instansi->save();
+
+            $this->syncPengusulKerjaPraktek($instansi, false);
+        });
+
         return back()->with('success','Instansi ditolak.');
     }
 
@@ -370,6 +382,63 @@ class AdminController extends Controller
     {
         $instansis = Instansi::all();
         return view('admin.lowongan.edit', compact('lowongan', 'instansis'));
+    }
+
+    private function syncPengusulKerjaPraktek(Instansi $instansi, bool $approved): void
+    {
+        if (!$instansi->pengusul_mahasiswa_id) {
+            return;
+        }
+
+        $mahasiswa = Mahasiswa::with('user')->find($instansi->pengusul_mahasiswa_id);
+        if (!$mahasiswa || !$mahasiswa->user) {
+            return;
+        }
+
+        $startDate = now();
+        $kerjaPraktek = KerjaPraktek::firstOrCreate(
+            [
+                'mahasiswa_id' => $mahasiswa->user_id,
+                'instansi_id' => $instansi->id,
+            ],
+            [
+                'judul_kp' => 'Kerja Praktek ' . $instansi->nama_instansi,
+                'deskripsi_kp' => 'Dibuat otomatis dari usulan instansi.',
+                'status' => 'diajukan',
+                'tanggal_mulai' => $startDate,
+                'tanggal_selesai' => $startDate->copy()->addWeeks(8),
+                'durasi_minggu' => 8,
+                'pilihan_1' => $instansi->nama_instansi,
+                'instansi_diterima' => $instansi->nama_instansi,
+                'proposal_file' => $instansi->proposal_file_path,
+            ]
+        );
+
+        if ($approved) {
+            $kerjaPraktek->update([
+                'status' => 'berlangsung',
+                'instansi_diterima' => $instansi->nama_instansi,
+            ]);
+            $kerjaPraktek->updateProgress('kp_dimulai');
+            $pendaftaranStatus = PendaftaranKP::STATUS_SEDANG_KP;
+        } else {
+            $kerjaPraktek->update([
+                'status' => 'ditolak',
+            ]);
+            $pendaftaranStatus = PendaftaranKP::STATUS_DITOLAK;
+        }
+
+        PendaftaranKP::updateOrCreate(
+            [
+                'mahasiswa_id' => $mahasiswa->id,
+                'kerja_praktek_id' => $kerjaPraktek->id,
+            ],
+            [
+                'status' => $pendaftaranStatus,
+                'tanggal_daftar' => now(),
+                'jenis' => 'instansi',
+            ]
+        );
     }
 
     public function updateLowongan(Request $request, Lowongan $lowongan)

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Proposal;
 use App\Models\Mahasiswa;
+use App\Models\PendaftaranKP;
 
 class KerjaPraktekController extends Controller
 {
@@ -100,7 +101,8 @@ class KerjaPraktekController extends Controller
                 $data['proposal_file'] = $path;
             }
 
-            KerjaPraktek::create($data);
+            $kerjaPraktek = KerjaPraktek::create($data);
+            $this->syncPendaftaran($kerjaPraktek, PendaftaranKP::STATUS_DRAFT);
 
             DB::commit();
 
@@ -228,6 +230,7 @@ class KerjaPraktekController extends Controller
 
         $kerjaPraktek->update(['status' => 'diajukan']);
         $kerjaPraktek->updateProgress('menunggu');
+        $this->syncPendaftaran($kerjaPraktek, PendaftaranKP::STATUS_MENUNGGU);
 
         // Sinkronkan proposal agar muncul di Validasi Proposal dosen pembimbing
         try {
@@ -275,6 +278,7 @@ class KerjaPraktekController extends Controller
 
         $kerjaPraktek->update(['status' => 'berlangsung']);
         $kerjaPraktek->updateProgress('kp_dimulai');
+        $this->syncPendaftaran($kerjaPraktek, PendaftaranKP::STATUS_SEDANG_KP);
 
         return back()->with('success', 'Pendaftaran KP berhasil disetujui');
     }
@@ -298,6 +302,7 @@ class KerjaPraktekController extends Controller
             'status' => 'ditolak',
             'catatan_nilai' => $request->alasan_penolakan
         ]);
+        $this->syncPendaftaran($kerjaPraktek, PendaftaranKP::STATUS_DITOLAK);
 
         return back()->with('success', 'Pendaftaran KP berhasil ditolak');
     }
@@ -318,6 +323,7 @@ class KerjaPraktekController extends Controller
         }
 
         $kerjaPraktek->update(['status' => 'berlangsung']);
+        $this->syncPendaftaran($kerjaPraktek, PendaftaranKP::STATUS_SEDANG_KP);
 
         return back()->with('success', 'KP berhasil dimulai');
     }
@@ -338,6 +344,7 @@ class KerjaPraktekController extends Controller
         }
 
         $kerjaPraktek->update(['status' => 'selesai']);
+        $this->syncPendaftaran($kerjaPraktek, PendaftaranKP::STATUS_SELESAI);
 
         return back()->with('success', 'KP berhasil diselesaikan');
     }
@@ -422,6 +429,47 @@ class KerjaPraktekController extends Controller
     /**
      * Helper methods
      */
+    private function syncPendaftaran(KerjaPraktek $kerjaPraktek, ?string $status = null): void
+    {
+        $mahasiswaId = $this->resolveMahasiswaId($kerjaPraktek->mahasiswa_id);
+        if (!$mahasiswaId) {
+            return;
+        }
+
+        $pendaftaran = PendaftaranKP::firstOrNew([
+            'mahasiswa_id' => $mahasiswaId,
+            'kerja_praktek_id' => $kerjaPraktek->id,
+        ]);
+
+        if (!$pendaftaran->exists) {
+            $pendaftaran->jenis = 'instansi';
+            $pendaftaran->tanggal_daftar = now();
+            $pendaftaran->status = $status ?? PendaftaranKP::STATUS_DRAFT;
+        } elseif ($status !== null) {
+            $pendaftaran->status = $status;
+        }
+
+        if (!$pendaftaran->tanggal_daftar) {
+            $pendaftaran->tanggal_daftar = now();
+        }
+
+        $pendaftaran->save();
+    }
+
+    private function resolveMahasiswaId(int $userId): ?int
+    {
+        $mahasiswa = Mahasiswa::firstOrCreate(
+            ['user_id' => $userId],
+            [
+                'nim' => '',
+                'prodi' => '',
+                'angkatan' => (int) now()->format('Y'),
+            ]
+        );
+
+        return $mahasiswa->id;
+    }
+
     private function canAccessKerjaPraktek(KerjaPraktek $kerjaPraktek)
     {
         $user = Auth::user();
