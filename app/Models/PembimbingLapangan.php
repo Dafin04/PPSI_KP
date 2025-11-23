@@ -12,11 +12,19 @@ class PembimbingLapangan extends Model
     protected $fillable = [
         'user_id',
         'instansi',
+        'instansi_id',
+        'nip',
+        'jabatan',
+        'kontak',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-}
 
+    public function instansi()
+    {
+        return $this->belongsTo(Instansi::class);
+    }
+}

@@ -12,9 +12,10 @@
     <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white shadow-sm rounded-lg p-6">
 
-            <h3 class="text-lg font-medium text-gray-700 mb-5">Form Bimbingan Lengkap</h3>
+            <h3 class="text-lg font-medium text-gray-700 mb-5">Form Bimbingan</h3>
             <div class="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-                Minimal {{ $minimumBimbingan }} bimbingan harus disetujui sebelum seminar dan unggah laporan akhir. Pastikan tanggal bimbingan tidak sama.
+                Minimal {{ $minimumBimbingan }} bimbingan harus disetujui sebelum seminar dan unggah laporan akhir.
+                Tidak boleh tanggal mundur dan maksimal 1 bimbingan per hari.
             </div>
 
             @if(session('error'))
@@ -36,12 +37,18 @@
                     </select>
                 </div>
 
-                <!-- Tanggal Bimbingan -->
+                <!-- Tanggal & Waktu Bimbingan -->
                 <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Tanggal Bimbingan</label>
-                    <input type="date" name="tanggal_bimbingan" id="tanggal_bimbingan"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        required>
+                    <label class="block text-gray-700 font-medium mb-2">Tanggal & Waktu Bimbingan</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input type="date" name="tanggal_bimbingan" id="tanggal_bimbingan"
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            required>
+                        <input type="time" name="waktu_bimbingan" id="waktu_bimbingan"
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            required>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Maksimal 1 bimbingan per hari, tidak boleh tanggal mundur.</p>
                 </div>
 
                 <!-- Topik Bimbingan -->
@@ -52,71 +59,19 @@
                         placeholder="Masukkan topik bimbingan..." required>
                 </div>
 
-                <!-- Hasil Bimbingan -->
+                <!-- Catatan / Pertanyaan -->
                 <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Hasil Bimbingan</label>
-                    <textarea name="hasil_bimbingan" rows="3"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Tuliskan hasil dari bimbingan..." required></textarea>
-                </div>
-
-                <!-- Catatan -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Catatan Pembahasan <span class="text-red-500">*</span></label>
+                    <label class="block text-gray-700 font-medium mb-2">Catatan / Pertanyaan <span class="text-red-500">*</span></label>
                     <textarea name="catatan" rows="3" required
                         class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Tuliskan hasil tindak lanjut atau arahan dosen..."></textarea>
+                        placeholder="Tuliskan pertanyaan atau bahasan yang ingin dibimbing..."></textarea>
                 </div>
 
-                <!-- Metode -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Metode Bimbingan</label>
-                    <select name="metode"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="offline" selected>Offline</option>
-                        <option value="online">Online</option>
-                    </select>
-                </div>
-
-                <!-- Durasi -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Durasi (menit)</label>
-                    <input type="number" name="durasi_menit" value="60" min="1"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <!-- File Lampiran -->
+                <!-- Lampiran -->
                 <div class="mb-4">
                     <label class="block text-gray-700 font-medium mb-2">Lampiran (opsional)</label>
                     <input type="file" name="file_lampiran"
                         class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <!-- Rating Kualitas -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Rating Kualitas (1–5)</label>
-                    <input type="number" name="rating_kualitas" min="1" max="5"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <!-- Feedback Mahasiswa -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Feedback Mahasiswa</label>
-                    <textarea name="feedback_mahasiswa" rows="2"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Masukkan umpan balik mahasiswa (opsional)..."></textarea>
-                </div>
-
-                <!-- Status -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Status</label>
-                    <select name="status"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="menunggu" selected>Menunggu</option>
-                        <option value="disetujui">Disetujui</option>
-                        <option value="ditolak">Ditolak</option>
-                        <option value="selesai">Selesai</option>
-                    </select>
                 </div>
 
                 <!-- Tombol -->
@@ -140,9 +95,18 @@
 
         form.addEventListener('submit', function (e) {
             const selectedDate = tanggalInput.value;
+            if (!selectedDate) return;
+
+            const today = new Date().toISOString().split('T')[0];
+            if (selectedDate < today) {
+                e.preventDefault();
+                alert('Tanggal bimbingan tidak boleh mundur.');
+                return;
+            }
+
             if (existingDates.includes(selectedDate)) {
                 e.preventDefault();
-                                alert('Tanggal bimbingan ini sudah digunakan. Pilih tanggal lain.'););
+                alert('Tanggal bimbingan ini sudah digunakan. Maksimal 1 bimbingan per hari.');
             }
         });
     });

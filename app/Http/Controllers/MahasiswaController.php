@@ -267,18 +267,14 @@ class MahasiswaController extends Controller
             'tanggal_bimbingan' => [
                 'required',
                 'date',
+                'after_or_equal:today',
                 Rule::unique('bimbingans', 'tanggal_bimbingan')
                     ->where(fn ($query) => $query->where('mahasiswa_id', $mahasiswa->id)),
             ],
+            'waktu_bimbingan' => 'required|date_format:H:i',
             'topik_bimbingan' => 'required|string',
-            'hasil_bimbingan' => 'required|string',
             'catatan' => 'required|string',
-            'metode' => 'nullable|string',
-            'durasi_menit' => 'nullable|integer',
             'file_lampiran' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg|max:2048',
-            'rating_kualitas' => 'nullable|integer|min:1|max:5',
-            'feedback_mahasiswa' => 'nullable|string',
-            'status' => 'nullable|string'
         ]);
 
         $proposal = Proposal::find($request->proposal_id);
@@ -308,15 +304,16 @@ class MahasiswaController extends Controller
             'dosen_pembimbing_id' => $proposal->dosen_id ?? null,
             'mahasiswa_id' => $mahasiswa->id,
             'tanggal_bimbingan' => $request->tanggal_bimbingan,
+            'waktu_bimbingan' => $request->waktu_bimbingan,
             'topik_bimbingan' => $request->topik_bimbingan,
-            'hasil_bimbingan' => $request->hasil_bimbingan,
+            'hasil_bimbingan' => $request->catatan,
             'catatan' => $request->catatan,
-            'metode' => $request->metode ?? 'offline',
-            'durasi_menit' => $request->durasi_menit ?? 60,
+            'metode' => 'offline',
+            'durasi_menit' => 60,
             'file_lampiran' => $fileLampiranPath,
-            'rating_kualitas' => $request->rating_kualitas,
-            'feedback_mahasiswa' => $request->feedback_mahasiswa,
-            'status' => $request->status ?? 'menunggu',
+            'rating_kualitas' => null,
+            'feedback_mahasiswa' => null,
+            'status' => 'menunggu',
         ]);
 
         if ($proposal->kerja_praktek_id) {
@@ -372,6 +369,34 @@ class MahasiswaController extends Controller
         $bimbingan->delete();
 
         return redirect()->route('mahasiswa.bimbingan.index')->with('success', 'Bimbingan berhasil dihapus.');
+    }
+
+    // ======================
+    // PROFIL MAHASISWA
+    // ======================
+    public function editProfil()
+    {
+        $mahasiswa = $this->resolveMahasiswaProfile();
+        return view('mahasiswa.profil', compact('mahasiswa'));
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $mahasiswa = $this->resolveMahasiswaProfile();
+
+        $validated = $request->validate([
+            'nim' => 'required|string|max:50',
+            'prodi' => 'nullable|string|max:100',
+            'angkatan' => 'nullable|integer|min:2000|max:' . now()->year,
+            'ipk' => 'nullable|numeric|min:0|max:4',
+            'prestasi_akademik' => 'nullable|string',
+            'prestasi_non_akademik' => 'nullable|string',
+            'pengalaman_si' => 'nullable|string',
+        ]);
+
+        $mahasiswa->update($validated);
+
+        return redirect()->route('mahasiswa.profil')->with('success', 'Profil mahasiswa berhasil diperbarui.');
     }
 
     // ======================

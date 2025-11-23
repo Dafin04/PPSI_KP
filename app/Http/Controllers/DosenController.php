@@ -136,7 +136,7 @@ class DosenController extends Controller
     {
         $validated = $request->validate([
             'catatan' => 'nullable|string',
-            'status' => 'nullable|in:menunggu,disetujui,ditolak,terjadwal,berlangsung,selesai,dibatalkan',
+            'status' => 'nullable|in:menunggu,disetujui,ditolak',
             'feedback_dosen' => 'nullable|string',
         ]);
 
@@ -152,6 +152,17 @@ class DosenController extends Controller
         }
 
         if (!empty($payload)) $bimbingan->update($payload);
+
+        // Jika ACC, update jumlah bimbingan disetujui pada KP
+        if (($payload['status'] ?? null) === 'disetujui' && $bimbingan->kerja_praktek_id) {
+            $jumlah = Bimbingan::where('kerja_praktek_id', $bimbingan->kerja_praktek_id)
+                ->where('status', 'disetujui')
+                ->count();
+            if ($kp = \App\Models\KerjaPraktek::find($bimbingan->kerja_praktek_id)) {
+                $kp->jumlah_bimbingan = $jumlah;
+                $kp->save();
+            }
+        }
 
         return redirect()->route('dosen.bimbingan.index')->with('success', 'Bimbingan diperbarui.');
     }
@@ -388,5 +399,44 @@ class DosenController extends Controller
         ]);
 
         return in_array($userId, $pengujiIds, true);
+    }
+
+    // ======================
+    // PROFIL DOSEN
+    // ======================
+    public function editProfil()
+    {
+        $user = auth()->user();
+        $dosen = $user->dosen ?: \App\Models\Dosen::create([
+            'user_id' => $user->id,
+            'nip' => $user->nip ?? '',
+            'jabatan' => '',
+            'status_aktif' => true,
+        ]);
+
+        return view('dosen.profil', compact('dosen', 'user'));
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $user = auth()->user();
+        $dosen = $user->dosen ?: \App\Models\Dosen::create([
+            'user_id' => $user->id,
+            'nip' => '',
+            'jabatan' => '',
+            'status_aktif' => true,
+        ]);
+
+        $validated = $request->validate([
+            'nip' => 'required|string|max:50',
+            'jabatan' => 'nullable|string|max:100',
+            'prodi' => 'nullable|string|max:100',
+            'keahlian' => 'nullable|string|max:255',
+            'status_aktif' => 'nullable|boolean',
+        ]);
+
+        $dosen->update($validated);
+
+        return redirect()->route('dosen.profil')->with('success', 'Profil dosen berhasil diperbarui.');
     }
 }

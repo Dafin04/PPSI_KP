@@ -133,6 +133,10 @@ Route::middleware(['auth', 'role:mahasiswa'])->prefix('mahasiswa')->name('mahasi
     Route::get('/seminar/create', [MahasiswaController::class, 'createSeminar'])->name('seminar.create');
     Route::post('/seminar', [MahasiswaController::class, 'storeSeminar'])->name('seminar.store');
     Route::post('/seminar/{seminar}/revisi', [MahasiswaController::class, 'uploadSeminarRevision'])->name('seminar.revisi');
+
+    // Profil mahasiswa
+    Route::get('/profil', [MahasiswaController::class, 'editProfil'])->name('profil');
+    Route::put('/profil', [MahasiswaController::class, 'updateProfil'])->name('profil.update');
 });
 
 // Dosen routes
@@ -165,6 +169,10 @@ Route::middleware(['auth', 'role:dosen'])->prefix('dosen')->name('dosen.')->grou
     Route::post('/seminar/{seminar}/approve', [DosenController::class, 'approveSeminar'])->name('seminar.approve');
     Route::post('/seminar/{seminar}/revisi', [DosenController::class, 'requestSeminarRevision'])->name('seminar.revisi');
     Route::post('/seminar/{seminar}/revisi/approve', [DosenController::class, 'approveSeminarRevision'])->name('seminar.revisi.approve');
+
+    // Profil dosen
+    Route::get('/profil', [DosenController::class, 'editProfil'])->name('profil');
+    Route::put('/profil', [DosenController::class, 'updateProfil'])->name('profil.update');
 });
 
 // Pembimbing Lapangan routes
@@ -191,6 +199,10 @@ Route::middleware(['auth', 'role:pembimbing_lapangan'])->prefix('lapangan')->nam
     Route::get('/kuota/{kuota}/edit', [PembimbingLapanganController::class, 'editKuota'])->name('kuota.edit');
     Route::put('/kuota/{kuota}', [PembimbingLapanganController::class, 'updateKuota'])->name('kuota.update');
     Route::get('/kuesioner/{kuesioner}', [PembimbingLapanganController::class, 'showKuesioner'])->name('kuesioner.show');
+
+    // Profil pembimbing lapangan
+    Route::get('/profil', [PembimbingLapanganController::class, 'editProfil'])->name('profil');
+    Route::put('/profil', [PembimbingLapanganController::class, 'updateProfil'])->name('profil.update');
 });
 
 // Kerja Praktek routes (shared across roles; controller enforces access)

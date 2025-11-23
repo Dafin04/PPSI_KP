@@ -43,6 +43,11 @@ class Instansi extends Model
         return $this->hasMany(Kuota::class);
     }
 
+    public function pembimbingLapangans()
+    {
+        return $this->hasMany(PembimbingLapangan::class);
+    }
+
     // Scope untuk instansi aktif
     public function scopeAktif($query)
     {

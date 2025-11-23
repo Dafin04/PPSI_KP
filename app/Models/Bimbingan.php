@@ -19,6 +19,7 @@ class Bimbingan extends Model
         'catatan',
         'topik_bimbingan',
         'hasil_bimbingan',
+        'waktu_bimbingan',
         'metode',
         'durasi_menit',
         'status',

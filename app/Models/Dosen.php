@@ -13,6 +13,9 @@ class Dosen extends Model
         'user_id',
         'nip',
         'jabatan',
+        'prodi',
+        'keahlian',
+        'status_aktif',
     ];
 
     public function user()

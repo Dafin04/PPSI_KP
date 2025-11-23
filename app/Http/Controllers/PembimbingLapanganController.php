@@ -128,13 +128,15 @@ class PembimbingLapanganController extends Controller
         ]);
 
         $user = auth()->user();
+        $pembimbing = \App\Models\PembimbingLapangan::with('instansi')->where('user_id', $user->id)->first();
+        $instansiName = $pembimbing?->instansi?->nama_instansi ?? $user->fakultas ?? 'Mitra KP';
         $certificatePath = $this->sertifikatKpGenerator->generate([
             'nama_pembimbing' => $user->name,
             'nik' => $user->nip ?? $user->id,
             'semester' => now()->month >= 7 ? 'Ganjil' : 'Genap',
             'tahun' => now()->format('Y'),
             'nama_kaprodi' => 'Kaprodi Sistem Informasi',
-            'instansi' => $user->fakultas ?? 'Mitra KP',
+            'instansi' => $instansiName,
         ]);
 
         $kuesioner->update([
@@ -202,4 +204,39 @@ class PembimbingLapanganController extends Controller
 
     // TODO: Laporan monitoring mahasiswa
     // TODO: Evaluasi mahasiswa
+
+    // ======================
+    // PROFIL PEMBIMBING LAPANGAN
+    // ======================
+    public function editProfil()
+    {
+        $user = auth()->user();
+        $pembimbing = \App\Models\PembimbingLapangan::with('instansi')->firstOrCreate(
+            ['user_id' => $user->id],
+            ['instansi_id' => null, 'instansi' => $user->fakultas ?? null, 'nip' => $user->nip ?? null, 'jabatan' => $user->jabatan ?? null]
+        );
+        $instansis = Instansi::orderBy('nama_instansi')->get();
+
+        return view('pembimbing-lapangan.profil', compact('pembimbing', 'instansis', 'user'));
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $user = auth()->user();
+        $pembimbing = \App\Models\PembimbingLapangan::firstOrCreate(
+            ['user_id' => $user->id],
+            ['instansi_id' => null]
+        );
+
+        $validated = $request->validate([
+            'nip' => 'nullable|string|max:50',
+            'jabatan' => 'nullable|string|max:100',
+            'instansi_id' => 'nullable|exists:instansis,id',
+            'kontak' => 'nullable|string|max:255',
+        ]);
+
+        $pembimbing->update($validated);
+
+        return redirect()->route('lapangan.profil')->with('success', 'Profil pembimbing lapangan diperbarui.');
+    }
 }

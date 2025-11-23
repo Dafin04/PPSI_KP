@@ -89,6 +89,13 @@ class KerjaPraktek extends Model
         return $query->whereIn('status', ['disetujui', 'berlangsung']);
     }
 
+    public function scopePeriodeAktif($query, $date = null)
+    {
+        $date = $date ?: now();
+        return $query->whereDate('tanggal_mulai', '<=', $date)
+            ->whereDate('tanggal_selesai', '>=', $date);
+    }
+
     public function scopeSelesai($query)
     {
         return $query->where('status', 'selesai');

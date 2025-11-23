@@ -182,6 +182,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Profil dosen terkait user (jika ada)
+     */
+    public function dosen()
+    {
+        return $this->hasOne(Dosen::class);
+    }
+
+    /**
+     * Profil pembimbing lapangan terkait user (jika ada)
+     */
+    public function pembimbingLapangan()
+    {
+        return $this->hasOne(PembimbingLapangan::class);
+    }
+
+    /**
      * KP sebagai pengawas lapangan
      */
     public function kerjaPrakteksSebagaiPengawas()

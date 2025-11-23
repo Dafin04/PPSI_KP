@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Instansi;
+use App\Models\PembimbingLapangan;
 use App\Models\Lowongan;
 use App\Models\Kuota;
 use App\Models\KerjaPraktek;
@@ -264,7 +265,8 @@ class AdminController extends Controller
 
     public function createInstansi()
     {
-        return view('admin.instansi.create');
+        $pembimbingLapangans = PembimbingLapangan::with('user')->orderBy('id')->get();
+        return view('admin.instansi.create', compact('pembimbingLapangans'));
     }
 
     public function storeInstansi(Request $request)
@@ -280,16 +282,26 @@ class AdminController extends Controller
             'email' => 'sometimes|email|nullable',
             'website' => 'sometimes|url|nullable',
             'status' => 'boolean',
+            'pembimbing_lapangan_ids' => 'nullable|array',
+            'pembimbing_lapangan_ids.*' => 'exists:pembimbing_lapangans,id',
         ]);
         $data = $this->buildInstansiPayload($request);
-        Instansi::create($data);
+        $instansi = Instansi::create($data);
+
+        $ids = collect($validated['pembimbing_lapangan_ids'] ?? [])->map(fn($id) => (int) $id)->all();
+        if (!empty($ids)) {
+            PembimbingLapangan::whereIn('id', $ids)->update(['instansi_id' => $instansi->id]);
+        }
 
         return redirect()->route('admin.instansi.index')->with('success', 'Instansi berhasil dibuat.');
     }
 
     public function editInstansi(Instansi $instansi)
     {
-        return view('admin.instansi.edit', compact('instansi'));
+        $pembimbingLapangans = PembimbingLapangan::with('user')->orderBy('id')->get();
+        $selectedPembimbingIds = $instansi->pembimbingLapangans()->pluck('id')->toArray();
+
+        return view('admin.instansi.edit', compact('instansi', 'pembimbingLapangans', 'selectedPembimbingIds'));
     }
 
     public function updateInstansi(Request $request, Instansi $instansi)
@@ -305,9 +317,19 @@ class AdminController extends Controller
             'email' => 'sometimes|email|nullable',
             'website' => 'sometimes|url|nullable',
             'status' => 'boolean',
+            'pembimbing_lapangan_ids' => 'nullable|array',
+            'pembimbing_lapangan_ids.*' => 'exists:pembimbing_lapangans,id',
         ]);
         $data = $this->buildInstansiPayload($request);
         $instansi->update($data);
+
+        $ids = collect($validated['pembimbing_lapangan_ids'] ?? [])->map(fn($id) => (int) $id)->all();
+        // Lepas PL yang tidak dipilih
+        $instansi->pembimbingLapangans()->whereNotIn('id', $ids)->update(['instansi_id' => null]);
+        // Pasang PL yang dipilih
+        if (!empty($ids)) {
+            PembimbingLapangan::whereIn('id', $ids)->update(['instansi_id' => $instansi->id]);
+        }
 
         return redirect()->route('admin.instansi.index')->with('success', 'Instansi berhasil diperbarui.');
     }
@@ -587,8 +609,8 @@ class AdminController extends Controller
                     'dosen_id' => (int) $validated['dosen_pembimbing_id'],
                     'judul' => $kerjaPraktek->judul_kp ?? 'Judul KP',
                     'file_proposal' => '',
-                    'status' => 'pending',
-                    'status_validasi' => 'pending',
+                    'status' => 'diajukan',
+                    'status_validasi' => 'diajukan',
                     'tanggal_upload' => now(),
                 ]);
             }
@@ -663,15 +685,24 @@ class AdminController extends Controller
     // Monitoring & Laporan
     public function monitoring()
     {
+        $periodeQuery = KerjaPraktek::periodeAktif();
+
         $totalMahasiswa = User::whereHas('roles', fn($q) => $q->where('slug', 'mahasiswa'))->count();
         $totalDosen = User::whereHas('roles', fn($q) => $q->whereIn('slug', ['dosen']))->count();
-        $kpByStatus = KerjaPraktek::select('status', DB::raw('count(*) as total'))
+        $kpByStatus = (clone $periodeQuery)
+            ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')->pluck('total','status');
-        $totalKP = KerjaPraktek::count();
-        $kpSelesai = KerjaPraktek::where('status','selesai')->count();
-        $kpBerlangsung = KerjaPraktek::where('status','berlangsung')->count();
-        $bimbinganCount = DB::table('bimbingans')->count();
-        $instansiTop = KerjaPraktek::select('instansi_id', DB::raw('count(*) as total'))
+        $totalKP = (clone $periodeQuery)->count();
+        $kpSelesai = (clone $periodeQuery)->where('status','selesai')->count();
+        $kpBerlangsung = (clone $periodeQuery)->where('status','berlangsung')->count();
+
+        $aktifKpIds = (clone $periodeQuery)->pluck('id');
+        $bimbinganCount = DB::table('bimbingans')
+            ->whereIn('kerja_praktek_id', $aktifKpIds)
+            ->count();
+
+        $instansiTop = (clone $periodeQuery)
+            ->select('instansi_id', DB::raw('count(*) as total'))
             ->whereNotNull('instansi_id')
             ->groupBy('instansi_id')
             ->orderByDesc('total')

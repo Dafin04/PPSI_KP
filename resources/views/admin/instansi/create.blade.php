@@ -37,6 +37,25 @@
                                 </label>
                                 <x-input-error :messages="$errors->get('status')" class="mt-2" />
                             </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Pembimbing Lapangan (opsional)</label>
+                                <div class="max-h-52 overflow-y-auto border rounded-md divide-y">
+                                    @foreach($pembimbingLapangans as $pl)
+                                        <label class="flex items-center gap-3 px-3 py-2 text-sm">
+                                            <input type="checkbox" name="pembimbing_lapangan_ids[]" value="{{ $pl->id }}"
+                                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                @checked(collect(old('pembimbing_lapangan_ids', []))->contains($pl->id))>
+                                            <span>
+                                                <span class="font-medium text-gray-800">{{ $pl->user->name ?? 'PL #'.$pl->id }}</span>
+                                                <span class="text-gray-500 text-xs"> {{ $pl->instansi ? ' (Instansi: '.$pl->instansi.')' : '' }}</span>
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Centang PL yang akan langsung diikat ke instansi baru.</p>
+                                <x-input-error :messages="$errors->get('pembimbing_lapangan_ids')" class="mt-2" />
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-6">
@@ -51,4 +70,3 @@
         </div>
     </div>
 </x-app-layout>
-

@@ -344,7 +344,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M5 11h14M7 15h10M9 19h6" />
                                         </svg>
                                     </span>
-                                    <span class="font-medium">Instansi & Lowongan</span>
+                                    <span class="font-medium">Pendaftaran Mandiri</span>
                                 </a>
 
                                 @php $kpActive = request()->routeIs('kerja-praktek.*'); @endphp
@@ -539,6 +539,61 @@
 
             <!-- Page Content -->
             <main class="flex-1 ml-80 p-6 overflow-y-auto">
+                @auth
+                    @if(auth()->user()->hasRole('mahasiswa') && request()->routeIs('mahasiswa.dashboard'))
+                        <div class="flex justify-end mb-4">
+                            <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-full px-4 py-2 shadow-sm">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-semibold">
+                                    {{ strtoupper(substr(auth()->user()->name,0,1)) }}
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
+                                <div class="flex items-center gap-2 text-sm">
+                                    <a href="{{ route('mahasiswa.profil') }}" class="text-blue-600 hover:underline">Profil Saya</a>
+                                    <span class="text-gray-300">|</span>
+                                    <a href="#" class="text-red-600 hover:underline"
+                                       onclick="event.preventDefault(); document.getElementById('logout-form-mahasiswa').submit();">
+                                        Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @elseif((auth()->user()->hasRole('dosen') || auth()->user()->hasRole('dosen-biasa')) && request()->routeIs('dosen.dashboard'))
+                        <div class="flex justify-end mb-4">
+                            <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-full px-4 py-2 shadow-sm">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-semibold">
+                                    {{ strtoupper(substr(auth()->user()->name,0,1)) }}
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
+                                <div class="flex items-center gap-2 text-sm">
+                                    <a href="{{ route('dosen.profil') }}" class="text-blue-600 hover:underline">Profil Saya</a>
+                                    <span class="text-gray-300">|</span>
+                                    <a href="#" class="text-red-600 hover:underline"
+                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @elseif((auth()->user()->hasRole('pembimbing-lapangan') || auth()->user()->hasRole('pembimbing_lapangan')) && request()->routeIs('lapangan.dashboard'))
+                        <div class="flex justify-end mb-4">
+                            <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-full px-4 py-2 shadow-sm">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-semibold">
+                                    {{ strtoupper(substr(auth()->user()->name,0,1)) }}
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
+                                <div class="flex items-center gap-2 text-sm">
+                                    <a href="{{ route('lapangan.profil') }}" class="text-blue-600 hover:underline">Profil Saya</a>
+                                    <span class="text-gray-300">|</span>
+                                    <a href="#" class="text-red-600 hover:underline"
+                                       onclick="event.preventDefault(); document.getElementById('logout-form-pembimbing').submit();">
+                                        Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endauth
+
                 {{ $slot ?? '' }}
             </main>
         </div>
