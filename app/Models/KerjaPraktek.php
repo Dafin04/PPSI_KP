@@ -91,9 +91,11 @@ class KerjaPraktek extends Model
 
     public function scopePeriodeAktif($query, $date = null)
     {
-        $date = $date ?: now();
-        return $query->whereDate('tanggal_mulai', '<=', $date)
-            ->whereDate('tanggal_selesai', '>=', $date);
+        $activeId = \App\Models\PeriodeKp::activeId();
+        if ($activeId) {
+            return $query->where('periode_id', $activeId);
+        }
+        return $query;
     }
 
     public function scopeSelesai($query)

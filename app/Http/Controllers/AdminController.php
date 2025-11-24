@@ -597,24 +597,25 @@ class AdminController extends Controller
                 'angkatan' => (int) now()->format('Y')
             ]);
         }
-        if ($mhs) {
-            // Set dosen_id untuk semua proposal mahasiswa tsb
-            Proposal::where('mahasiswa_id', $mhs->id)
-                ->update(['dosen_id' => (int) $validated['dosen_pembimbing_id']]);
+            if ($mhs) {
+                // Set dosen_id untuk semua proposal mahasiswa tsb
+                Proposal::where('mahasiswa_id', $mhs->id)
+                    ->update(['dosen_id' => (int) $validated['dosen_pembimbing_id']]);
 
-            // Jika mahasiswa belum punya proposal sama sekali, buat draft dari data KP
-            if (!Proposal::where('mahasiswa_id', $mhs->id)->exists()) {
-                Proposal::create([
-                    'mahasiswa_id' => $mhs->id,
-                    'dosen_id' => (int) $validated['dosen_pembimbing_id'],
-                    'judul' => $kerjaPraktek->judul_kp ?? 'Judul KP',
-                    'file_proposal' => '',
-                    'status' => 'diajukan',
-                    'status_validasi' => 'diajukan',
-                    'tanggal_upload' => now(),
-                ]);
+                // Jika mahasiswa belum punya proposal sama sekali, buat draft dari data KP
+                if (!Proposal::where('mahasiswa_id', $mhs->id)->exists()) {
+                    Proposal::create([
+                        'mahasiswa_id' => $mhs->id,
+                        'dosen_id' => (int) $validated['dosen_pembimbing_id'],
+                        'judul' => $kerjaPraktek->judul_kp ?? 'Judul KP',
+                        'file_proposal' => '',
+                        'status' => 'diajukan',
+                        'status_validasi' => 'diajukan',
+                        'tanggal_upload' => now(),
+                        'periode_id' => $kerjaPraktek->periode_id,
+                    ]);
+                }
             }
-        }
 
         return back()->with('success', 'Dosen pembimbing berhasil dialokasikan.');
     }

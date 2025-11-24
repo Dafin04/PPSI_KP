@@ -314,6 +314,7 @@ class MahasiswaController extends Controller
             'rating_kualitas' => null,
             'feedback_mahasiswa' => null,
             'status' => 'menunggu',
+            'periode_id' => \App\Models\PeriodeKp::activeId(),
         ]);
 
         if ($proposal->kerja_praktek_id) {
@@ -456,6 +457,7 @@ class MahasiswaController extends Controller
             ]);
 
             $defaultStart = now()->addWeek();
+            $periodeId = \App\Models\PeriodeKp::activeId();
             $kerjaPraktek = KerjaPraktek::firstOrCreate(
                 [
                     'mahasiswa_id' => $user->id,
@@ -471,6 +473,7 @@ class MahasiswaController extends Controller
                     'pilihan_1' => $instansi->nama_instansi,
                     'instansi_diterima' => $instansi->nama_instansi,
                     'proposal_file' => $proposalPath,
+                    'periode_id' => $periodeId,
                 ]
             );
 
@@ -478,6 +481,7 @@ class MahasiswaController extends Controller
                 'status' => 'diajukan',
                 'instansi_diterima' => $instansi->nama_instansi,
                 'proposal_file' => $proposalPath,
+                'periode_id' => $periodeId,
             ]);
             $kerjaPraktek->updateProgress('menunggu');
 

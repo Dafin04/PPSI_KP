@@ -125,20 +125,33 @@
         </a>
 
         {{-- Alokasi Dosen --}}
-        <a href="{{ route('admin.alokasi.pembimbing') }}"
-           class="flex items-center gap-4 rounded-xl px-4 py-3 border transition-all duration-200
-           {{ request()->routeIs('admin.alokasi.pembimbing')
-                ? 'bg-orange-500 text-white border-orange-400 shadow-md'
-                : 'text-gray-700 border-gray-100 hover:bg-orange-50 hover:text-orange-700' }}">
-            <span class="w-10 h-10 rounded-lg flex items-center justify-center {{ request()->routeIs('admin.alokasi.pembimbing') ? 'bg-white/20' : 'bg-orange-100 text-orange-600' }}">
-                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586l5.414 5.414V19a2 2 0 01-2 2z" />
-                </svg>
-            </span>
-            <span class="font-medium">Alokasi Dosen</span>
-        </a>
+                                <a href="{{ route('admin.alokasi.pembimbing') }}"
+                                   class="flex items-center gap-4 rounded-xl px-4 py-3 border transition-all duration-200
+                                   {{ request()->routeIs('admin.alokasi.pembimbing')
+                                        ? 'bg-orange-500 text-white border-orange-400 shadow-md'
+                                        : 'text-gray-700 border-gray-100 hover:bg-orange-50 hover:text-orange-700' }}">
+                                    <span class="w-10 h-10 rounded-lg flex items-center justify-center {{ request()->routeIs('admin.alokasi.pembimbing') ? 'bg-white/20' : 'bg-orange-100 text-orange-600' }}">
+                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                             stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586l5.414 5.414V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </span>
+                                    <span class="font-medium">Alokasi Dosen</span>
+                                </a>
+
+                                <a href="{{ route('admin.periode.index') }}"
+                                   class="flex items-center gap-4 rounded-xl px-4 py-3 border transition-all duration-200
+                                   {{ request()->routeIs('admin.periode.*')
+                                        ? 'bg-blue-600 text-white border-blue-500 shadow-md'
+                                        : 'text-gray-700 border-gray-100 hover:bg-blue-50 hover:text-blue-700' }}">
+                                    <span class="w-10 h-10 rounded-lg flex items-center justify-center {{ request()->routeIs('admin.periode.*') ? 'bg-white/20' : 'bg-blue-100 text-blue-600' }}">
+                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </span>
+                                    <span class="font-medium">Periode KP</span>
+                                </a>
 
         {{-- Logout --}}
         <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"

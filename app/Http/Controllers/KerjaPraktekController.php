@@ -92,6 +92,7 @@ class KerjaPraktekController extends Controller
             $data = $request->all();
             $data['mahasiswa_id'] = $user->id;
             $data['status'] = 'draft';
+            $data['periode_id'] = \App\Models\PeriodeKp::activeId();
 
             // Handle file upload
             if ($request->hasFile('proposal_file')) {

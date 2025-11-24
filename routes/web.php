@@ -6,6 +6,7 @@ use App\Http\Controllers\DosenController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\PembimbingLapanganController;
 use App\Http\Controllers\KerjaPraktekController;
+use App\Http\Controllers\PeriodeKpController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -87,6 +88,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/monitoring', [AdminController::class, 'monitoring'])->name('monitoring');
     Route::post('/kp/approve-all', [AdminController::class, 'approveAllKerjaPraktek'])->name('kp.approve-all');
     Route::post('/kp/{kerjaPraktek}/hasil', [AdminController::class, 'tetapkanHasil'])->name('kp.hasil');
+
+    // Periode KP
+    Route::get('/periode', [PeriodeKpController::class, 'index'])->name('periode.index');
+    Route::get('/periode/create', [PeriodeKpController::class, 'create'])->name('periode.create');
+    Route::post('/periode', [PeriodeKpController::class, 'store'])->name('periode.store');
+    Route::get('/periode/{periodeKp}/edit', [PeriodeKpController::class, 'edit'])->name('periode.edit');
+    Route::put('/periode/{periodeKp}', [PeriodeKpController::class, 'update'])->name('periode.update');
+    Route::delete('/periode/{periodeKp}', [PeriodeKpController::class, 'destroy'])->name('periode.destroy');
+    Route::post('/periode/{periodeKp}/aktif', [PeriodeKpController::class, 'setAktif'])->name('periode.aktif');
 });
 
 // Mahasiswa routes
