@@ -16,13 +16,13 @@
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Instansi Kerja Sama</h3>
                     <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full table-auto border border-gray-200 text-sm">
+                            <thead class="bg-gray-100">
                                 <tr>
-                                    <th class="px-4 py-2 text-left">Instansi</th>
-                                    <th class="px-4 py-2 text-left">Kota</th>
-                                    <th class="px-4 py-2 text-left">Kuota Terbaru</th>
-                                    <th class="px-4 py-2 text-left">Status</th>
+                                    <th class="px-4 py-2 text-left border-b">Instansi</th>
+                                    <th class="px-4 py-2 text-left border-b">Kota</th>
+                                    <th class="px-4 py-2 text-left border-b">Kuota Terbaru</th>
+                                    <th class="px-4 py-2 text-left border-b">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -30,13 +30,13 @@
                                     @php
                                         $kuotaTerbaru = optional($instansi->kuotas->sortByDesc('tahun')->first());
                                     @endphp
-                                    <tr>
-                                        <td class="px-4 py-2 font-medium text-gray-800">{{ $instansi->nama_instansi }}</td>
-                                        <td class="px-4 py-2 text-gray-600">{{ $instansi->kota ?? '-' }}</td>
-                                        <td class="px-4 py-2 text-gray-600">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 border-b font-medium text-gray-800">{{ $instansi->nama_instansi }}</td>
+                                        <td class="px-4 py-2 border-b text-gray-600">{{ $instansi->kota ?? '-' }}</td>
+                                        <td class="px-4 py-2 border-b text-gray-600">
                                             {{ $kuotaTerbaru ? $kuotaTerbaru->jumlah . ' mahasiswa (' . $kuotaTerbaru->tahun . ')' : '-' }}
                                         </td>
-                                        <td class="px-4 py-2">
+                                        <td class="px-4 py-2 border-b">
                                             <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold
                                                 {{ ($instansi->status ?? false) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
                                                 {{ ($instansi->status ?? false) ? 'Terbuka' : 'Tidak Aktif' }}
@@ -60,24 +60,24 @@
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Lowongan KP Aktif</h3>
                     <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full table-auto border border-gray-200 text-sm">
+                            <thead class="bg-gray-100">
                                 <tr>
-                                    <th class="px-4 py-2 text-left">Instansi</th>
-                                    <th class="px-4 py-2 text-left">Judul Lowongan</th>
-                                    <th class="px-4 py-2 text-left">Kebutuhan Skill</th>
-                                    <th class="px-4 py-2 text-left">Kuota</th>
-                                    <th class="px-4 py-2 text-left">Periode</th>
+                                    <th class="px-4 py-2 text-left border-b">Instansi</th>
+                                    <th class="px-4 py-2 text-left border-b">Judul Lowongan</th>
+                                    <th class="px-4 py-2 text-left border-b">Kebutuhan Skill</th>
+                                    <th class="px-4 py-2 text-left border-b">Kuota</th>
+                                    <th class="px-4 py-2 text-left border-b">Periode</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($lowonganAktif as $lowongan)
-                                    <tr>
-                                        <td class="px-4 py-2 font-medium text-gray-800">{{ $lowongan->instansi->nama_instansi ?? '-' }}</td>
-                                        <td class="px-4 py-2">{{ $lowongan->judul_lowongan }}</td>
-                                        <td class="px-4 py-2 text-gray-600">{{ $lowongan->kebutuhan_keahlian ?? '-' }}</td>
-                                        <td class="px-4 py-2">{{ $lowongan->jumlah_kuota ?? '-' }}</td>
-                                        <td class="px-4 py-2 text-gray-600">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 border-b font-medium text-gray-800">{{ $lowongan->instansi->nama_instansi ?? '-' }}</td>
+                                        <td class="px-4 py-2 border-b">{{ $lowongan->judul_lowongan }}</td>
+                                        <td class="px-4 py-2 border-b text-gray-600">{{ $lowongan->kebutuhan_keahlian ?? '-' }}</td>
+                                        <td class="px-4 py-2 border-b">{{ $lowongan->jumlah_kuota ?? '-' }}</td>
+                                        <td class="px-4 py-2 border-b text-gray-600">
                                             {{ optional($lowongan->tanggal_mulai)->format('d M Y') }} - {{ optional($lowongan->tanggal_selesai)->format('d M Y') }}
                                         </td>
                                     </tr>

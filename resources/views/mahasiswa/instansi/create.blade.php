@@ -95,6 +95,30 @@
                             <x-input-error class="mt-1" :messages="$errors->get('proposal_file')" />
                         </div>
 
+                        <div class="border-t border-gray-200 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Upload Bukti IPK <span class="text-red-500">*</span></label>
+                                <input type="file" name="bukti_ipk_file" accept=".pdf,.jpg,.jpeg,.png" required class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                                <p class="mt-1 text-xs text-gray-500">Format PDF/JPG/PNG, maksimal 2 MB.</p>
+                                <x-input-error class="mt-1" :messages="$errors->get('bukti_ipk_file')" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Prestasi Akademik (Opsional)</label>
+                                <textarea name="prestasi_akademik" rows="2" class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Tuliskan prestasi akademik jika ada">{{ old('prestasi_akademik') }}</textarea>
+                                <x-input-error class="mt-1" :messages="$errors->get('prestasi_akademik')" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Prestasi Non-Akademik (Opsional)</label>
+                                <textarea name="prestasi_non_akademik" rows="2" class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Tuliskan prestasi non-akademik jika ada">{{ old('prestasi_non_akademik') }}</textarea>
+                                <x-input-error class="mt-1" :messages="$errors->get('prestasi_non_akademik')" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Pengalaman di Sistem Informasi</label>
+                                <textarea name="pengalaman_si" rows="3" class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ceritakan pengalaman/portofolio di bidang SI" required>{{ old('pengalaman_si') }}</textarea>
+                                <x-input-error class="mt-1" :messages="$errors->get('pengalaman_si')" />
+                            </div>
+                        </div>
+
                         <div class="flex justify-end gap-3">
                             <a href="{{ route('mahasiswa.instansi.index') }}" class="inline-flex items-center px-4 py-2 rounded-md border border-gray-300 text-gray-700 text-sm hover:bg-gray-50">Batal</a>
                             <button type="submit" class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700">Ajukan Instansi</button>

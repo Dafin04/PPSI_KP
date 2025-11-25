@@ -76,22 +76,6 @@
             <span class="font-medium">Kelola Pengguna</span>
         </a>
 
-        {{-- Monitor KP --}}
-        <a href="{{ route('admin.monitoring') }}"
-           class="flex items-center gap-4 rounded-xl px-4 py-3 border transition-all duration-200
-           {{ request()->routeIs('admin.monitoring')
-                ? 'bg-blue-500 text-white border-blue-400 shadow-md'
-                : 'text-gray-700 border-gray-100 hover:bg-blue-50 hover:text-blue-700' }}">
-            <span class="w-10 h-10 rounded-lg flex items-center justify-center {{ request()->routeIs('admin.monitoring') ? 'bg-white/20' : 'bg-blue-100 text-blue-600' }}">
-                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M3 13.5V6a2.25 2.25 0 012.25-2.25h8.25m-6 2.25L10.5 7.5m2.25 2.25L10.5 7.5m2.25 2.25V12" />
-                </svg>
-            </span>
-            <span class="font-medium">Monitor KP</span>
-        </a>
-
         {{-- Data Instansi --}}
         <a href="{{ route('admin.instansi.index') }}"
            class="flex items-center gap-4 rounded-xl px-4 py-3 border transition-all duration-200

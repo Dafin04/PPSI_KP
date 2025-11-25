@@ -47,34 +47,41 @@
             <!-- Tabel Laporan -->
             <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div class="p-6 overflow-x-auto">
-                    <table class="min-w-full text-sm divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full table-auto border border-gray-200 text-sm">
+                        <thead class="bg-gray-100">
                             <tr>
-                                <th class="px-4 py-2 text-left">Judul</th>
-                                <th class="px-4 py-2 text-left">Status</th>
+                                <th class="px-4 py-2 text-left border-b">Judul</th>
+                                <th class="px-4 py-2 text-left border-b">Status</th>
                                 @if($hasNote)
-                                    <th class="px-4 py-2 text-left">Catatan Dosen</th>
+                                    <th class="px-4 py-2 text-left border-b">Catatan Dosen</th>
                                 @endif
-                                <th class="px-4 py-2 text-left">Tanggal</th>
-                                <th class="px-4 py-2 text-left">Aksi</th>
+                                <th class="px-4 py-2 text-left border-b">Tanggal</th>
+                                <th class="px-4 py-2 text-left border-b">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @forelse($laporans as $l)
-                                <tr>
-                                    <td class="px-4 py-2">{{ $l->judul }}</td>
-                                    <td class="px-4 py-2 capitalize">{{ $l->status ?? ($l->status_validasi ?? '-') }}</td>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2 border-b">{{ $l->judul }}</td>
+                                    <td class="px-4 py-2 border-b capitalize">{{ $l->status ?? ($l->status_validasi ?? '-') }}</td>
                                     @if($hasNote)
-                                        <td class="px-4 py-2 text-gray-600">{{ $l->catatan_validasi ?? '-' }}</td>
+                                        <td class="px-4 py-2 border-b text-gray-600">{{ $l->catatan_validasi ?? '-' }}</td>
                                     @endif
-                                    <td class="px-4 py-2">{{ optional($l->tanggal_upload ?? $l->created_at)->format('d M Y') }}</td>
-                                    <td class="px-4 py-2">
-                                        <a href="{{ route('mahasiswa.laporan.edit', $l) }}" class="text-indigo-600 hover:underline">Edit</a>
-                                        <form action="{{ route('mahasiswa.laporan.destroy', $l) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Hapus laporan ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="text-red-600 hover:underline">Hapus</button>
-                                        </form>
+                                    <td class="px-4 py-2 border-b">{{ optional($l->tanggal_upload ?? $l->created_at)->format('d M Y') }}</td>
+                                    <td class="px-4 py-2 border-b">
+                                        <div class="flex items-center gap-2">
+                                            <a href="{{ route('mahasiswa.laporan.edit', $l) }}"
+                                               class="inline-flex items-center px-3 py-1 rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-medium">
+                                                Edit
+                                            </a>
+                                            <form action="{{ route('mahasiswa.laporan.destroy', $l) }}" method="POST" class="inline" onsubmit="return confirm('Hapus laporan ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="inline-flex items-center px-3 py-1 rounded-md border border-red-200 text-red-700 hover:bg-red-50 text-xs font-medium">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty

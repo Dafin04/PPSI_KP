@@ -21,6 +21,10 @@ class PendaftaranKP extends Model
         'mahasiswa_id',
         'kerja_praktek_id',
         'jenis',
+        'bukti_ipk_file',
+        'prestasi_akademik',
+        'prestasi_non_akademik',
+        'pengalaman_si',
         'tanggal_daftar',
         'status',
     ];

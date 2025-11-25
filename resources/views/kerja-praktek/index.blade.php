@@ -31,46 +31,58 @@
                     @endif
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full table-auto">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-4 py-2 text-left">Judul KP</th>
-                                    <th class="px-4 py-2 text-left">Mahasiswa</th>
-                                    <th class="px-4 py-2 text-left">Instansi</th>
-                                    <th class="px-4 py-2 text-left">Dosen Pembimbing</th>
-                                    <th class="px-4 py-2 text-left">Status</th>
-                                    <th class="px-4 py-2 text-left">Tanggal Mulai</th>
-                                    <th class="px-4 py-2 text-left">Aksi</th>
+                        <table class="min-w-full table-auto border border-gray-200 text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-2 text-left border-b">Judul KP</th>
+                                    <th class="px-4 py-2 text-left border-b">Mahasiswa</th>
+                                    <th class="px-4 py-2 text-left border-b">Instansi</th>
+                                    <th class="px-4 py-2 text-left border-b">Dosen Pembimbing</th>
+                                    <th class="px-4 py-2 text-left border-b">Status</th>
+                                    <th class="px-4 py-2 text-left border-b">Tanggal Mulai</th>
+                                    <th class="px-4 py-2 text-left border-b">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-gray-100">
                                 @forelse($kerjaPrakteks as $kp)
-                                    <tr class="border-t">
-                                        <td class="px-4 py-2">{{ Str::limit($kp->judul_kp, 50) }}</td>
-                                        <td class="px-4 py-2">{{ $kp->mahasiswa->name }}</td>
-                                        <td class="px-4 py-2">{{ $kp->instansi->nama_instansi }}</td>
-                                        <td class="px-4 py-2">{{ $kp->dosenPembimbing->name ?? '-' }}</td>
-                                        <td class="px-4 py-2">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 border-b">{{ Str::limit($kp->judul_kp, 50) }}</td>
+                                        <td class="px-4 py-2 border-b">{{ $kp->mahasiswa->name }}</td>
+                                        <td class="px-4 py-2 border-b">{{ $kp->instansi->nama_instansi }}</td>
+                                        <td class="px-4 py-2 border-b">{{ $kp->dosenPembimbing->name ?? '-' }}</td>
+                                        <td class="px-4 py-2 border-b">
                                             {!! $kp->getStatusBadgeAttribute() !!}
                                         </td>
-                                        <td class="px-4 py-2">{{ $kp->tanggal_mulai->format('d/m/Y') }}</td>
-                                        <td class="px-4 py-2">
-                                            <a href="{{ route('kerja-praktek.show', $kp) }}" class="text-blue-600 hover:text-blue-900 mr-2">Lihat</a>
-                                            @if($kp->isEditable() && $kp->mahasiswa_id === auth()->id())
-                                                <a href="{{ route('kerja-praktek.edit', $kp) }}" class="text-green-600 hover:text-green-900 mr-2">Edit</a>
-                                            @endif
-                                            @if($kp->status === 'draft' && $kp->mahasiswa_id === auth()->id())
-                                                <form action="{{ route('kerja-praktek.submit', $kp) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    <button type="submit" class="text-yellow-600 hover:text-yellow-900" onclick="return confirm('Apakah Anda yakin ingin mengajukan pendaftaran ini?')">Ajukan</button>
-                                                </form>
-                                            @endif
+                                        <td class="px-4 py-2 border-b">{{ optional($kp->tanggal_mulai)->format('d/m/Y') ?? '-' }}</td>
+                                        <td class="px-4 py-2 border-b text-center">
+                                            <div class="flex items-center justify-center space-x-2">
+                                                <a href="{{ route('kerja-praktek.show', $kp) }}"
+                                                   class="inline-flex items-center px-3 py-1 rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-medium">
+                                                    Lihat
+                                                </a>
+                                                @if($kp->isEditable() && $kp->mahasiswa_id === auth()->id())
+                                                    <a href="{{ route('kerja-praktek.edit', $kp) }}"
+                                                       class="inline-flex items-center px-3 py-1 rounded-md border border-amber-200 text-amber-700 hover:bg-amber-50 text-xs font-medium">
+                                                        Edit
+                                                    </a>
+                                                @endif
+                                                @if($kp->status === 'draft' && $kp->mahasiswa_id === auth()->id())
+                                                    <form action="{{ route('kerja-praktek.submit', $kp) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit"
+                                                                class="inline-flex items-center px-3 py-1 rounded-md border border-green-200 text-green-700 hover:bg-green-50 text-xs font-medium"
+                                                                onclick="return confirm('Apakah Anda yakin ingin mengajukan pendaftaran ini?')">
+                                                            Ajukan
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                                            Belum ada pendaftaran kerja praktek
+                                        <td colspan="7" class="px-4 py-6 text-center text-gray-500">
+                                            Belum ada pendaftaran kerja praktek.
                                         </td>
                                     </tr>
                                 @endforelse

@@ -25,31 +25,31 @@
 
                 <div class="overflow-x-auto">
                     {{-- Tambahkan kelas w-full di sini untuk memastikan tabel menggunakan lebar penuh kontainer --}}
-                    <table class="min-w-full table-auto w-full">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full table-auto w-full border border-gray-200 text-sm">
+                        <thead class="bg-gray-100">
                             <tr>
                                 {{-- Mengatur lebar minimal agar header terlihat jelas --}}
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[35%] min-w-[150px]">Nama Instansi</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%] min-w-[120px]">Kontak</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] min-w-[80px]">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] min-w-[80px]">Verifikasi</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] min-w-[120px]">Pembimbing Lapangan</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%] min-w-[150px]">Aksi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b w-[35%] min-w-[150px]">Nama Instansi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b w-[30%] min-w-[120px]">Kontak</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b w-[10%] min-w-[80px]">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b w-[10%] min-w-[80px]">Verifikasi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b w-[10%] min-w-[120px]">Pembimbing Lapangan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b w-[15%] min-w-[150px]">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-white divide-y divide-gray-100">
                             @forelse($instansis as $instansi)
-                                <tr>
+                                <tr class="hover:bg-gray-50">
                                     {{-- Gunakan break-words untuk teks panjang --}}
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 break-words">
+                                    <td class="px-6 py-4 border-b text-sm font-medium text-gray-900 break-words">
                                         {{ $instansi->nama_instansi }}
                                     </td>
                                     {{-- Gunakan break-words untuk kontak panjang --}}
-                                    <td class="px-6 py-4 text-sm text-gray-500 break-words">
+                                    <td class="px-6 py-4 border-b text-sm text-gray-500 break-words">
                                         {{ $instansi->kontak ?? $instansi->telepon ?? $instansi->kontak_person ?? '-' }}
                                     </td>
                                     {{-- Status --}}
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-6 py-4 border-b whitespace-nowrap">
                                         @if(($instansi->status ?? $instansi->status_aktif ?? false))
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                                 Aktif
@@ -61,7 +61,7 @@
                                         @endif
                                     </td>
                                     {{-- Verifikasi --}}
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-6 py-4 border-b whitespace-nowrap">
                                         @php $v = $instansi->status_verifikasi ?? null; @endphp
                                         @if($v === 'disetujui')
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-50 text-green-700">Disetujui</span>
@@ -72,26 +72,26 @@
                                         @endif
                                     </td>
                                     {{-- Pembimbing Lapangan --}}
-                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                    <td class="px-6 py-4 border-b text-sm text-gray-600">
                                         {{ $instansi->pembimbingLapangans->count() }} terdaftar
                                     </td>
                                     {{-- Aksi --}}
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <td class="px-6 py-4 border-b whitespace-nowrap text-sm font-medium">
                                         @if(($instansi->status_verifikasi ?? 'pending') === 'pending')
                                             <form method="POST" action="{{ route('admin.instansi.verify', $instansi) }}" class="inline">@csrf
-                                                <button class="text-green-600 hover:underline mr-2">Setujui</button>
+                                                <button class="inline-flex items-center px-3 py-1 rounded-md border border-green-200 text-green-700 hover:bg-green-50 text-xs font-medium mr-2">Setujui</button>
                                             </form>
                                             <form method="POST" action="{{ route('admin.instansi.reject', $instansi) }}" class="inline">@csrf
-                                                <button class="text-red-600 hover:underline mr-3">Tolak</button>
+                                                <button class="inline-flex items-center px-3 py-1 rounded-md border border-red-200 text-red-700 hover:bg-red-50 text-xs font-medium mr-3">Tolak</button>
                                             </form>
                                         @endif
 
-                                        <a href="{{ route('admin.instansi.edit', $instansi) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
+                                        <a href="{{ route('admin.instansi.edit', $instansi) }}" class="inline-flex items-center px-3 py-1 rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-medium mr-2">Edit</a>
                                         <form method="POST" action="{{ route('admin.instansi.destroy', $instansi) }}" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             {{-- Menggunakan tombol khusus untuk konfirmasi, bukan alert() --}}
-                                            <button type="submit" class="text-red-600 hover:text-red-900"
+                                            <button type="submit" class="inline-flex items-center px-3 py-1 rounded-md border border-red-200 text-red-700 hover:bg-red-50 text-xs font-medium"
                                                 onclick="event.preventDefault(); if (confirm('Apakah Anda yakin ingin menghapus instansi ini?')) { this.closest('form').submit(); }">
                                                 Hapus
                                             </button>

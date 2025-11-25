@@ -20,26 +20,26 @@
                     @endif
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full table-auto border border-gray-200 text-sm">
+                            <thead class="bg-gray-100">
                                 <tr>
-                                    <th class="px-4 py-2 text-left">Tahun Ajaran</th>
-                                    <th class="px-4 py-2 text-left">Semester</th>
-                                    <th class="px-4 py-2 text-left">Pendaftaran</th>
-                                    <th class="px-4 py-2 text-left">Status</th>
-                                    <th class="px-4 py-2 text-left">Aksi</th>
+                                    <th class="px-4 py-2 text-left border-b">Tahun Ajaran</th>
+                                    <th class="px-4 py-2 text-left border-b">Semester</th>
+                                    <th class="px-4 py-2 text-left border-b">Pendaftaran</th>
+                                    <th class="px-4 py-2 text-left border-b">Status</th>
+                                    <th class="px-4 py-2 text-left border-b">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($periodes as $periode)
-                                    <tr>
-                                        <td class="px-4 py-2 font-medium text-gray-800">{{ $periode->tahun_ajaran }}</td>
-                                        <td class="px-4 py-2">{{ $periode->semester }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-600">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 border-b font-medium text-gray-800">{{ $periode->tahun_ajaran }}</td>
+                                        <td class="px-4 py-2 border-b">{{ $periode->semester }}</td>
+                                        <td class="px-4 py-2 border-b text-sm text-gray-600">
                                             {{ optional($periode->tgl_mulai_pendaftaran)->format('d M Y') ?? '-' }} s/d
                                             {{ optional($periode->tgl_selesai_pendaftaran)->format('d M Y') ?? '-' }}
                                         </td>
-                                        <td class="px-4 py-2">
+                                        <td class="px-4 py-2 border-b">
                                             @if($periode->status === 'Aktif')
                                                 <span class="px-2 py-1 text-xs rounded-md bg-green-100 text-green-700 font-semibold">Aktif</span>
                                             @elseif($periode->status === 'Ditutup')
@@ -48,23 +48,23 @@
                                                 <span class="px-2 py-1 text-xs rounded-md bg-gray-100 text-gray-700 font-semibold">Arsip</span>
                                             @endif
                                         </td>
-                                        <td class="px-4 py-2 space-x-2">
+                                        <td class="px-4 py-2 border-b space-x-2">
                                             @if($periode->status !== 'Aktif')
                                                 <form action="{{ route('admin.periode.aktif', $periode) }}" method="POST" class="inline">
                                                     @csrf
-                                                    <button class="text-blue-600 hover:underline text-sm">Set Aktif</button>
+                                                    <button class="inline-flex items-center px-3 py-1 rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-medium">Set Aktif</button>
                                                 </form>
                                             @endif
-                                            <a href="{{ route('admin.periode.edit', $periode) }}" class="text-indigo-600 hover:underline text-sm">Edit</a>
+                                            <a href="{{ route('admin.periode.edit', $periode) }}" class="inline-flex items-center px-3 py-1 rounded-md border border-amber-200 text-amber-700 hover:bg-amber-50 text-xs font-medium">Edit</a>
                                             <form action="{{ route('admin.periode.destroy', $periode) }}" method="POST" class="inline" onsubmit="return confirm('Hapus periode ini? Data tetap ada, tapi periode hilang.');">
                                                 @csrf @method('DELETE')
-                                                <button class="text-red-600 hover:underline text-sm">Hapus</button>
+                                                <button class="inline-flex items-center px-3 py-1 rounded-md border border-red-200 text-red-700 hover:bg-red-50 text-xs font-medium">Hapus</button>
                                             </form>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-4 py-4 text-center text-gray-500">Belum ada periode.</td>
+                                        <td colspan="5" class="px-4 py-4 text-center text-gray-500 border-b">Belum ada periode.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

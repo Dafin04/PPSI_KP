@@ -84,7 +84,11 @@ class KerjaPraktekController extends Controller
             'pilihan_2' => 'nullable|string|max:255',
             'pilihan_3' => 'nullable|string|max:255',
             'dosen_pembimbing_id' => 'required|exists:users,id',
-            'proposal_file' => 'nullable|file|mimes:pdf,doc,docx|max:2048'
+            'proposal_file' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            'bukti_ipk_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'prestasi_akademik' => 'nullable|string',
+            'prestasi_non_akademik' => 'nullable|string',
+            'pengalaman_si' => 'required|string'
         ]);
 
         DB::beginTransaction();
@@ -100,6 +104,12 @@ class KerjaPraktekController extends Controller
                 $filename = 'proposal_' . $user->nim . '_' . time() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('proposals', $filename, 'public');
                 $data['proposal_file'] = $path;
+            }
+            if ($request->hasFile('bukti_ipk_file')) {
+                $file = $request->file('bukti_ipk_file');
+                $filename = 'bukti_ipk_' . $user->nim . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('bukti_ipk', $filename, 'public');
+                $data['bukti_ipk_file'] = $path;
             }
 
             $kerjaPraktek = KerjaPraktek::create($data);
@@ -184,7 +194,11 @@ class KerjaPraktekController extends Controller
             'pilihan_2' => 'nullable|string|max:255',
             'pilihan_3' => 'nullable|string|max:255',
             'dosen_pembimbing_id' => 'required|exists:users,id',
-            'proposal_file' => 'nullable|file|mimes:pdf,doc,docx|max:2048'
+            'proposal_file' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            'bukti_ipk_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'prestasi_akademik' => 'nullable|string',
+            'prestasi_non_akademik' => 'nullable|string',
+            'pengalaman_si' => 'required|string'
         ]);
 
         DB::beginTransaction();
@@ -202,6 +216,15 @@ class KerjaPraktekController extends Controller
                 $filename = 'proposal_' . $user->nim . '_' . time() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('proposals', $filename, 'public');
                 $data['proposal_file'] = $path;
+            }
+            if ($request->hasFile('bukti_ipk_file')) {
+                if ($kerjaPraktek->bukti_ipk_file) {
+                    Storage::disk('public')->delete($kerjaPraktek->bukti_ipk_file);
+                }
+                $file = $request->file('bukti_ipk_file');
+                $filename = 'bukti_ipk_' . $user->nim . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('bukti_ipk', $filename, 'public');
+                $data['bukti_ipk_file'] = $path;
             }
 
             $kerjaPraktek->update($data);
@@ -453,6 +476,12 @@ class KerjaPraktekController extends Controller
         if (!$pendaftaran->tanggal_daftar) {
             $pendaftaran->tanggal_daftar = now();
         }
+
+        // sinkron data pendukung
+        $pendaftaran->bukti_ipk_file = $kerjaPraktek->bukti_ipk_file;
+        $pendaftaran->prestasi_akademik = $kerjaPraktek->prestasi_akademik;
+        $pendaftaran->prestasi_non_akademik = $kerjaPraktek->prestasi_non_akademik;
+        $pendaftaran->pengalaman_si = $kerjaPraktek->pengalaman_si;
 
         $pendaftaran->save();
     }

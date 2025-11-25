@@ -77,6 +77,32 @@
                         </div>
                     </div>
 
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-gray-700 mb-3">Data Pendukung Mahasiswa</h4>
+                        <div class="bg-gray-50 p-4 rounded grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="font-medium text-gray-800">Bukti IPK</p>
+                                @if($kerjaPraktek->bukti_ipk_file)
+                                    <a href="{{ asset('storage/'.$kerjaPraktek->bukti_ipk_file) }}" target="_blank" class="text-blue-600 hover:underline">Lihat Bukti IPK</a>
+                                @else
+                                    <span class="text-gray-500">Tidak ada file</span>
+                                @endif
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Pengalaman Sistem Informasi</p>
+                                <p class="text-gray-700">{{ $kerjaPraktek->pengalaman_si ?? '-' }}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <p class="font-medium text-gray-800">Prestasi Akademik (Opsional)</p>
+                                <p class="text-gray-700">{{ $kerjaPraktek->prestasi_akademik ?? '-' }}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <p class="font-medium text-gray-800">Prestasi Non-Akademik (Opsional)</p>
+                                <p class="text-gray-700">{{ $kerjaPraktek->prestasi_non_akademik ?? '-' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
                     @if($kerjaPraktek->proposal_file)
                         <div class="mt-6">
                             <h4 class="font-semibold text-gray-700 mb-3">File Proposal</h4>

@@ -16,32 +16,32 @@
                     @endif
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full table-auto">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-4 py-2 text-left">Nama</th>
-                                    <th class="px-4 py-2 text-left">Email</th>
-                                    <th class="px-4 py-2 text-left">Role Saat Ini</th>
-                                    <th class="px-4 py-2 text-left">Aksi</th>
+                        <table class="min-w-full table-auto border border-gray-200 text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-2 text-left border-b">Nama</th>
+                                    <th class="px-4 py-2 text-left border-b">Email</th>
+                                    <th class="px-4 py-2 text-left border-b">Role Saat Ini</th>
+                                    <th class="px-4 py-2 text-left border-b">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-gray-100">
                                 @foreach($users as $user)
-                                    <tr class="border-t">
-                                        <td class="px-4 py-2">{{ $user->name }}</td>
-                                        <td class="px-4 py-2">{{ $user->email }}</td>
-                                        <td class="px-4 py-2">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 border-b">{{ $user->name }}</td>
+                                        <td class="px-4 py-2 border-b">{{ $user->email }}</td>
+                                        <td class="px-4 py-2 border-b">
                                             @if($user->roles->count() > 0)
-                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
                                                     {{ $user->roles->first()->name }}
                                                 </span>
                                             @else
                                                 <span class="text-gray-500">Tidak ada role</span>
                                             @endif
                                         </td>
-                                        <td class="px-4 py-2">
+                                        <td class="px-4 py-2 border-b">
                                             <button onclick="openModal({{ $user->id }}, '{{ $user->name }}')"
-                                                    class="bg-blue-500 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded">
+                                                    class="inline-flex items-center px-3 py-1 rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-medium">
                                                 Ubah Role
                                             </button>
                                         </td>

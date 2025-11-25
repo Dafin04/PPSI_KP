@@ -16,58 +16,55 @@
                     @endif
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full table-auto">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-4 py-2 text-left">Mahasiswa</th>
-                                    <th class="px-4 py-2 text-left">Judul Seminar</th>
-                                    <th class="px-4 py-2 text-left">Ketua</th>
-                                    <th class="px-4 py-2 text-left">Anggota 1</th>
-                                    <th class="px-4 py-2 text-left">Anggota 2</th>
-                                    <th class="px-4 py-2 text-left">Pembimbing</th>
-                                    <th class="px-4 py-2 text-left">Aksi</th>
+                        <table class="min-w-full table-auto border border-gray-200 text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-2 text-left border-b">Mahasiswa</th>
+                                    <th class="px-4 py-2 text-left border-b">Judul Seminar</th>
+                                    <th class="px-4 py-2 text-left border-b">Ketua</th>
+                                    <th class="px-4 py-2 text-left border-b">Anggota 1</th>
+                                    <th class="px-4 py-2 text-left border-b">Anggota 2</th>
+                                    <th class="px-4 py-2 text-left border-b">Pembimbing</th>
+                                    <th class="px-4 py-2 text-left border-b">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-gray-100">
                                 @foreach($seminars as $seminar)
-                                    <tr class="border-t">
-                                        <td class="px-4 py-2">{{ $seminar->mahasiswa->name ?? '-' }}</td>
-                                        <td class="px-4 py-2">{{ $seminar->judul_seminar ?? '-' }}</td>
-                                        <td class="px-4 py-2">
-                                            <form method="POST" action="{{ route('admin.alokasi.penguji.set', $seminar) }}">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 border-b">{{ $seminar->mahasiswa->name ?? '-' }}</td>
+                                        <td class="px-4 py-2 border-b">{{ $seminar->judul_seminar ?? '-' }}</td>
+                                        <td class="px-4 py-2 border-b" colspan="4">
+                                            <form method="POST" action="{{ route('admin.alokasi.penguji.set', $seminar) }}" class="grid grid-cols-1 md:grid-cols-4 gap-2 items-center">
                                                 @csrf
-                                                <div class="grid grid-cols-1 md:grid-cols-4 gap-2 items-center">
-                                                    <select name="ketua_penguji_id" class="border rounded py-1 px-2">
-                                                        <option value="">-</option>
-                                                        @foreach($dosens as $dosen)
-                                                            <option value="{{ $dosen->id }}" @selected($seminar->ketua_penguji_id == $dosen->id)>{{ $dosen->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    <select name="anggota_penguji_1_id" class="border rounded py-1 px-2">
-                                                        <option value="">-</option>
-                                                        @foreach($dosens as $dosen)
-                                                            <option value="{{ $dosen->id }}" @selected($seminar->anggota_penguji_1_id == $dosen->id)>{{ $dosen->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    <select name="anggota_penguji_2_id" class="border rounded py-1 px-2">
-                                                        <option value="">-</option>
-                                                        @foreach($dosens as $dosen)
-                                                            <option value="{{ $dosen->id }}" @selected($seminar->anggota_penguji_2_id == $dosen->id)>{{ $dosen->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    <select name="pembimbing_penguji_id" class="border rounded py-1 px-2">
-                                                        <option value="">-</option>
-                                                        @foreach($dosens as $dosen)
-                                                            <option value="{{ $dosen->id }}" @selected($seminar->pembimbing_penguji_id == $dosen->id)>{{ $dosen->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="mt-2">
-                                                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded">Simpan</button>
+                                                <select name="ketua_penguji_id" class="border rounded py-1 px-2 text-sm">
+                                                    <option value="">-</option>
+                                                    @foreach($dosens as $dosen)
+                                                        <option value="{{ $dosen->id }}" @selected($seminar->ketua_penguji_id == $dosen->id)>{{ $dosen->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <select name="anggota_penguji_1_id" class="border rounded py-1 px-2 text-sm">
+                                                    <option value="">-</option>
+                                                    @foreach($dosens as $dosen)
+                                                        <option value="{{ $dosen->id }}" @selected($seminar->anggota_penguji_1_id == $dosen->id)>{{ $dosen->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <select name="anggota_penguji_2_id" class="border rounded py-1 px-2 text-sm">
+                                                    <option value="">-</option>
+                                                    @foreach($dosens as $dosen)
+                                                        <option value="{{ $dosen->id }}" @selected($seminar->anggota_penguji_2_id == $dosen->id)>{{ $dosen->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <select name="pembimbing_penguji_id" class="border rounded py-1 px-2 text-sm">
+                                                    <option value="">-</option>
+                                                    @foreach($dosens as $dosen)
+                                                        <option value="{{ $dosen->id }}" @selected($seminar->pembimbing_penguji_id == $dosen->id)>{{ $dosen->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="flex md:justify-end">
+                                                    <button type="submit" class="inline-flex items-center px-3 py-1 rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-medium">Simpan</button>
                                                 </div>
                                             </form>
                                         </td>
-                                        <td class="px-4 py-2" colspan="2"></td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -82,4 +79,3 @@
         </div>
     </div>
 </x-app-layout>
-

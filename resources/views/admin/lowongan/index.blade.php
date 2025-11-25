@@ -23,22 +23,22 @@
         </div>
     @endif
 
-    <table class="min-w-full bg-white border border-gray-200">
-        <thead>
+    <table class="min-w-full table-auto border border-gray-200 text-sm">
+        <thead class="bg-gray-100">
             <tr>
-                <th class="py-2 px-4 border-b">Instansi</th>
-                <th class="py-2 px-4 border-b">Judul Lowongan</th>
-                <th class="py-2 px-4 border-b">Deskripsi</th>
-                <th class="py-2 px-4 border-b">Kuota</th>
-                <th class="py-2 px-4 border-b">Tanggal Mulai</th>
-                <th class="py-2 px-4 border-b">Tanggal Selesai</th>
-                <th class="py-2 px-4 border-b">Status</th>
-                <th class="py-2 px-4 border-b">Aksi</th>
+                <th class="py-2 px-4 border-b text-left">Instansi</th>
+                <th class="py-2 px-4 border-b text-left">Judul Lowongan</th>
+                <th class="py-2 px-4 border-b text-left">Deskripsi</th>
+                <th class="py-2 px-4 border-b text-left">Kuota</th>
+                <th class="py-2 px-4 border-b text-left">Tanggal Mulai</th>
+                <th class="py-2 px-4 border-b text-left">Tanggal Selesai</th>
+                <th class="py-2 px-4 border-b text-left">Status</th>
+                <th class="py-2 px-4 border-b text-left">Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-100">
             @foreach($lowongans as $lowongan)
-            <tr>
+            <tr class="hover:bg-gray-50">
                 <td class="py-2 px-4 border-b">{{ $lowongan->instansi->nama_instansi }}</td>
                 <td class="py-2 px-4 border-b">{{ $lowongan->judul_lowongan }}</td>
                 <td class="py-2 px-4 border-b">{{ Str::limit($lowongan->deskripsi, 50) }}</td>
@@ -53,11 +53,11 @@
                     @endif
                 </td>
                 <td class="py-2 px-4 border-b">
-                    <a href="{{ route('admin.lowongan.edit', $lowongan) }}" class="text-blue-600 hover:underline mr-2">Edit</a>
+                    <a href="{{ route('admin.lowongan.edit', $lowongan) }}" class="inline-flex items-center px-3 py-1 rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-medium mr-2">Edit</a>
                     <form action="{{ route('admin.lowongan.destroy', $lowongan) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus lowongan ini?');">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="text-red-600 hover:underline">Hapus</button>
+                        <button type="submit" class="inline-flex items-center px-3 py-1 rounded-md border border-red-200 text-red-700 hover:bg-red-50 text-xs font-medium">Hapus</button>
                     </form>
                 </td>
             </tr>

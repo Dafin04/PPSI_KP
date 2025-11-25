@@ -431,13 +431,18 @@ class MahasiswaController extends Controller
             'email' => 'nullable|email',
             'website' => 'nullable|url',
             'proposal_file' => 'required|file|mimes:pdf,doc,docx|max:5120',
+            'bukti_ipk_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'prestasi_akademik' => 'nullable|string',
+            'prestasi_non_akademik' => 'nullable|string',
+            'pengalaman_si' => 'required|string',
         ]);
 
         $mahasiswaProfile = $this->resolveMahasiswaProfile();
         $user = auth()->user();
         $proposalPath = $request->file('proposal_file')->store('instansi/proposal', 'public');
+        $buktiIpkPath = $request->file('bukti_ipk_file')->store('bukti_ipk', 'public');
 
-        DB::transaction(function () use ($validated, $mahasiswaProfile, $user, $proposalPath) {
+        DB::transaction(function () use ($validated, $mahasiswaProfile, $user, $proposalPath, $buktiIpkPath) {
             $instansi = Instansi::create([
                 'nama_instansi' => $validated['nama_instansi'],
                 'alamat' => $validated['alamat'],
@@ -473,6 +478,10 @@ class MahasiswaController extends Controller
                     'pilihan_1' => $instansi->nama_instansi,
                     'instansi_diterima' => $instansi->nama_instansi,
                     'proposal_file' => $proposalPath,
+                    'bukti_ipk_file' => $buktiIpkPath,
+                    'prestasi_akademik' => $validated['prestasi_akademik'] ?? null,
+                    'prestasi_non_akademik' => $validated['prestasi_non_akademik'] ?? null,
+                    'pengalaman_si' => $validated['pengalaman_si'] ?? null,
                     'periode_id' => $periodeId,
                 ]
             );
@@ -481,6 +490,10 @@ class MahasiswaController extends Controller
                 'status' => 'diajukan',
                 'instansi_diterima' => $instansi->nama_instansi,
                 'proposal_file' => $proposalPath,
+                'bukti_ipk_file' => $buktiIpkPath,
+                'prestasi_akademik' => $validated['prestasi_akademik'] ?? null,
+                'prestasi_non_akademik' => $validated['prestasi_non_akademik'] ?? null,
+                'pengalaman_si' => $validated['pengalaman_si'] ?? null,
                 'periode_id' => $periodeId,
             ]);
             $kerjaPraktek->updateProgress('menunggu');
@@ -494,6 +507,10 @@ class MahasiswaController extends Controller
                     'status' => PendaftaranKP::STATUS_MENUNGGU,
                     'tanggal_daftar' => now(),
                     'jenis' => 'instansi',
+                    'bukti_ipk_file' => $buktiIpkPath,
+                    'prestasi_akademik' => $validated['prestasi_akademik'] ?? null,
+                    'prestasi_non_akademik' => $validated['prestasi_non_akademik'] ?? null,
+                    'pengalaman_si' => $validated['pengalaman_si'] ?? null,
                 ]
             );
         });
