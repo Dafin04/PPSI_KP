@@ -41,23 +41,6 @@
                                 <label class="block text-sm font-medium text-gray-700">Program Studi</label>
                                 <input type="text" name="prodi" value="{{ old('prodi', $mahasiswa->prodi) }}" class="mt-1 block w-full rounded-md border-gray-300">
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">IPK</label>
-                                <input type="number" step="0.01" name="ipk" value="{{ old('ipk', $mahasiswa->ipk) }}" class="mt-1 block w-full rounded-md border-gray-300">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Prestasi Akademik</label>
-                            <textarea name="prestasi_akademik" rows="2" class="mt-1 block w-full rounded-md border-gray-300">{{ old('prestasi_akademik', $mahasiswa->prestasi_akademik) }}</textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Prestasi Non-Akademik</label>
-                            <textarea name="prestasi_non_akademik" rows="2" class="mt-1 block w-full rounded-md border-gray-300">{{ old('prestasi_non_akademik', $mahasiswa->prestasi_non_akademik) }}</textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Pengalaman Bidang SI</label>
-                            <textarea name="pengalaman_si" rows="2" class="mt-1 block w-full rounded-md border-gray-300">{{ old('pengalaman_si', $mahasiswa->pengalaman_si) }}</textarea>
                         </div>
 
                         <div class="flex justify-end gap-3">
@@ -65,6 +48,31 @@
                             <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700">Simpan Profil</button>
                         </div>
                     </form>
+
+                    <div class="border-t pt-4 mt-6">
+                        <h4 class="text-sm font-semibold text-gray-900 mb-2">Ganti Kata Sandi</h4>
+                        <p class="text-sm text-gray-600 mb-3">Masukkan kata sandi lama dan kata sandi baru Anda.</p>
+                        <form method="POST" action="{{ route('mahasiswa.profil.password') }}" class="space-y-3">
+                            @csrf @method('PUT')
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Kata Sandi Lama</label>
+                                <input type="password" name="current_password" class="mt-1 block w-full rounded-md border-gray-300" required>
+                                @error('current_password')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Kata Sandi Baru</label>
+                                <input type="password" name="password" class="mt-1 block w-full rounded-md border-gray-300" required>
+                                @error('password')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Ulangi Kata Sandi Baru</label>
+                                <input type="password" name="password_confirmation" class="mt-1 block w-full rounded-md border-gray-300" required>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" class="px-4 py-2 rounded-md bg-orange-500 text-white text-sm hover:bg-orange-600">Update Kata Sandi</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

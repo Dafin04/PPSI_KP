@@ -109,22 +109,50 @@ class PembimbingLapanganController extends Controller
     public function storeKuesioner(Request $request)
     {
         $validated = $request->validate([
-            'isi_kuesioner' => 'nullable|string',
-            'kuota_tahun_depan' => 'required|integer|min:0',
-            'saran_kegiatan' => 'required|string',
-            'kebutuhan_skill' => 'required|string',
-            'tingkat_kepuasan' => 'required|in:puas,tidak_puas',
+            'nama' => 'required|string|max:255',
+            'jabatan' => 'required|string|max:255',
+            'institusi' => 'required|string|max:255',
+            'manfaat' => 'required|in:tidak,kurang,baik,sangat',
+            'kemampuan_kerja' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'kemandirian' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'penguasaan_materi' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'penguasaan_si' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'kerjasama' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'etika' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'sinergi' => 'required|in:tidak,sedikit,sedang,besar',
+            'lanjut' => 'required|in:ya,tidak',
+            'jumlah_mahasiswa' => 'nullable|integer|min:0',
+            'saran_matkul' => 'nullable|string',
+            'saran_kemampuan' => 'nullable|string',
         ]);
+
+        $payload = [
+            'nama' => $validated['nama'],
+            'jabatan' => $validated['jabatan'],
+            'institusi' => $validated['institusi'],
+            'manfaat' => $validated['manfaat'],
+            'kemampuan_kerja' => $validated['kemampuan_kerja'],
+            'kemandirian' => $validated['kemandirian'],
+            'penguasaan_materi' => $validated['penguasaan_materi'],
+            'penguasaan_si' => $validated['penguasaan_si'],
+            'kerjasama' => $validated['kerjasama'],
+            'etika' => $validated['etika'],
+            'sinergi' => $validated['sinergi'],
+            'lanjut' => $validated['lanjut'],
+            'jumlah_mahasiswa' => $validated['jumlah_mahasiswa'] ?? null,
+            'saran_matkul' => $validated['saran_matkul'] ?? '',
+            'saran_kemampuan' => $validated['saran_kemampuan'] ?? '',
+        ];
 
         $kuesioner = Kuesioner::create([
             'pembimbing_lapangan_id' => auth()->id(),
             'mahasiswa_id' => null,
-            'isi_kuesioner' => $validated['isi_kuesioner'],
+            'isi_kuesioner' => json_encode($payload),
             'tipe' => 'instansi',
-            'kuota_tahun_depan' => $validated['kuota_tahun_depan'],
-            'saran_kegiatan' => $validated['saran_kegiatan'],
-            'kebutuhan_skill' => $validated['kebutuhan_skill'],
-            'tingkat_kepuasan' => $validated['tingkat_kepuasan'],
+            'kuota_tahun_depan' => $validated['jumlah_mahasiswa'] ?? null,
+            'saran_kegiatan' => $validated['saran_matkul'] ?? '',
+            'kebutuhan_skill' => $validated['saran_kemampuan'] ?? '',
+            'tingkat_kepuasan' => $validated['manfaat'] ?? null,
         ]);
 
         $user = auth()->user();
@@ -155,9 +183,48 @@ class PembimbingLapanganController extends Controller
     public function updateKuesioner(Request $request, Kuesioner $kuesioner)
     {
         $validated = $request->validate([
-            'isi_kuesioner' => 'required|string',
+            'nama' => 'required|string|max:255',
+            'jabatan' => 'required|string|max:255',
+            'institusi' => 'required|string|max:255',
+            'manfaat' => 'required|in:tidak,kurang,baik,sangat',
+            'kemampuan_kerja' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'kemandirian' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'penguasaan_materi' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'penguasaan_si' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'kerjasama' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'etika' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
+            'sinergi' => 'required|in:tidak,sedikit,sedang,besar',
+            'lanjut' => 'required|in:ya,tidak',
+            'jumlah_mahasiswa' => 'nullable|integer|min:0',
+            'saran_matkul' => 'nullable|string',
+            'saran_kemampuan' => 'nullable|string',
         ]);
-        $kuesioner->update($validated);
+
+        $payload = [
+            'nama' => $validated['nama'],
+            'jabatan' => $validated['jabatan'],
+            'institusi' => $validated['institusi'],
+            'manfaat' => $validated['manfaat'],
+            'kemampuan_kerja' => $validated['kemampuan_kerja'],
+            'kemandirian' => $validated['kemandirian'],
+            'penguasaan_materi' => $validated['penguasaan_materi'],
+            'penguasaan_si' => $validated['penguasaan_si'],
+            'kerjasama' => $validated['kerjasama'],
+            'etika' => $validated['etika'],
+            'sinergi' => $validated['sinergi'],
+            'lanjut' => $validated['lanjut'],
+            'jumlah_mahasiswa' => $validated['jumlah_mahasiswa'] ?? null,
+            'saran_matkul' => $validated['saran_matkul'] ?? '',
+            'saran_kemampuan' => $validated['saran_kemampuan'] ?? '',
+        ];
+
+        $kuesioner->update([
+            'isi_kuesioner' => json_encode($payload),
+            'kuota_tahun_depan' => $validated['jumlah_mahasiswa'] ?? null,
+            'saran_kegiatan' => $validated['saran_matkul'] ?? '',
+            'kebutuhan_skill' => $validated['saran_kemampuan'] ?? '',
+            'tingkat_kepuasan' => $validated['manfaat'] ?? null,
+        ]);
         return redirect()->route('lapangan.kuesioner.index')->with('success', 'Kuesioner diperbarui.');
     }
 

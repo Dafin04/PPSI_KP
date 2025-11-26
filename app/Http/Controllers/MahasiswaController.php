@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Mahasiswa;
 use App\Models\KerjaPraktek;
 use App\Models\Seminar;
@@ -389,15 +390,30 @@ class MahasiswaController extends Controller
             'nim' => 'required|string|max:50',
             'prodi' => 'nullable|string|max:100',
             'angkatan' => 'nullable|integer|min:2000|max:' . now()->year,
-            'ipk' => 'nullable|numeric|min:0|max:4',
-            'prestasi_akademik' => 'nullable|string',
-            'prestasi_non_akademik' => 'nullable|string',
-            'pengalaman_si' => 'nullable|string',
         ]);
 
         $mahasiswa->update($validated);
 
         return redirect()->route('mahasiswa.profil')->with('success', 'Profil mahasiswa berhasil diperbarui.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = auth()->user();
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Kata sandi lama tidak sesuai.']);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return back()->with('success', 'Kata sandi berhasil diperbarui.');
     }
 
     // ======================

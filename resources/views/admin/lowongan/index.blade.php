@@ -11,11 +11,13 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
     <div class="p-6 text-gray-900">
-        <h1 class="text-2xl font-bold mb-4">Daftar Lowongan KP</h1>
-
-    <a href="{{ route('admin.lowongan.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 inline-block">
-        Tambah Lowongan Baru
-    </a>
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">Daftar Lowongan KP</h1>
+            <a href="{{ route('admin.lowongan.create') }}"
+               class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700">
+                Tambah Lowongan Baru
+            </a>
+        </div>
 
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">

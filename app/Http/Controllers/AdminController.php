@@ -660,6 +660,17 @@ class AdminController extends Controller
         return back()->with('success', 'Penguji seminar berhasil diperbarui.');
     }
 
+    // Kuesioner Pembimbing Lapangan (instansi)
+    public function kuesionerInstansi()
+    {
+        $kuesioners = \App\Models\Kuesioner::with('pembimbingLapangan')
+            ->where('tipe', 'instansi')
+            ->latest()
+            ->get();
+
+        return view('admin.kuesioner.index', compact('kuesioners'));
+    }
+
     public function approveAllKerjaPraktek()
     {
         $kps = KerjaPraktek::where('status', 'diajukan')->get();

@@ -86,8 +86,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Monitoring & laporan
     Route::get('/monitoring', [AdminController::class, 'monitoring'])->name('monitoring');
+    Route::get('/kuesioner-instansi', [AdminController::class, 'kuesionerInstansi'])->name('kuesioner.instansi');
     Route::post('/kp/approve-all', [AdminController::class, 'approveAllKerjaPraktek'])->name('kp.approve-all');
     Route::post('/kp/{kerjaPraktek}/hasil', [AdminController::class, 'tetapkanHasil'])->name('kp.hasil');
+    Route::get('/kuesioner-instansi', [AdminController::class, 'kuesionerInstansi'])->name('kuesioner.instansi');
 
     // Periode KP
     Route::get('/periode', [PeriodeKpController::class, 'index'])->name('periode.index');
@@ -147,6 +149,7 @@ Route::middleware(['auth', 'role:mahasiswa'])->prefix('mahasiswa')->name('mahasi
     // Profil mahasiswa
     Route::get('/profil', [MahasiswaController::class, 'editProfil'])->name('profil');
     Route::put('/profil', [MahasiswaController::class, 'updateProfil'])->name('profil.update');
+    Route::put('/profil/password', [MahasiswaController::class, 'updatePassword'])->name('profil.password');
 });
 
 // Dosen routes
