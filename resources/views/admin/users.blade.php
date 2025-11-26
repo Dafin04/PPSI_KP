@@ -13,6 +13,12 @@
                         <h3 class="text-lg font-semibold text-gray-900">Kelola Pengguna</h3>
                     </div>
 
+                    <div class="flex items-center justify-end mb-4">
+                        <a href="{{ route('admin.users.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700">
+                            Tambah Pengguna
+                        </a>
+                    </div>
+
                     @if(session('success'))
                         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                             {{ session('success') }}

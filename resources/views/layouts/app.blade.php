@@ -150,7 +150,7 @@
                         </nav>
 
                         <div class="p-6 border-t border-gray-200 bg-gray-50/50 text-center text-xs text-gray-500">
-                            <p>Ac 2024 SIKP</p>
+                            <p>@2025 SIKP</p>
                             <p class="text-gray-400 mt-1">Sistem Informasi Kerja Praktek</p>
                         </div>
                     </aside>
@@ -304,6 +304,11 @@
                         </nav>
 
                         <form id="logout-form-mahasiswa" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
+
+                        <div class="p-6 border-t border-gray-200 bg-gray-50/50 text-center text-xs text-gray-500">
+                            <p>@2025 SIKP</p>
+                            <p class="text-gray-400 mt-1">Sistem Informasi Kerja Praktek</p>
+                        </div>
                     </aside>
 
                 @elseif(auth()->user()->hasRole('dosen') || auth()->user()->hasRole('dosen-biasa'))
@@ -407,6 +412,11 @@
                         </nav>
 
                         <form id="logout-form-dosen" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
+
+                        <div class="p-6 border-t border-gray-200 bg-gray-50/50 text-center text-xs text-gray-500">
+                            <p>@2025 SIKP</p>
+                            <p class="text-gray-400 mt-1">Sistem Informasi Kerja Praktek</p>
+                        </div>
                     </aside>
 
                 @elseif(auth()->user()->hasRole('pembimbing-lapangan') || auth()->user()->hasRole('pembimbing_lapangan'))
@@ -493,6 +503,11 @@
                         </nav>
 
                         <form id="logout-form-pembimbing" method="POST" action="{{ route('logout') }}" class="hidden">@csrf</form>
+
+                        <div class="p-6 border-t border-gray-200 bg-gray-50/50 text-center text-xs text-gray-500">
+                            <p>@2025 SIKP</p>
+                            <p class="text-gray-400 mt-1">Sistem Informasi Kerja Praktek</p>
+                        </div>
                     </aside>
 
                 @endif

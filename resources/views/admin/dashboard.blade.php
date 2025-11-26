@@ -56,22 +56,64 @@
 @endphp
 
 <x-app-layout>
-    <x-slot name="header">
-        <div>
-            <p class="text-xs uppercase tracking-wide text-indigo-600 font-semibold">Dashboard</p>
-            <h2 class="text-3xl font-bold text-gray-900">Dashboard Admin</h2>
-            <p class="text-sm text-gray-600">Ringkasan pengelolaan Sistem KP.</p>
-        </div>
-    </x-slot>
-
-    <div class="bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="mb-6">
-                <h3 class="text-xl font-semibold text-gray-900">Dashboard Admin</h3>
-                <p class="text-sm text-gray-600">Ringkasan monitoring KP ditampilkan di bawah.</p>
+    <div class="bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+            {{-- Top bar: judul kiri, profil kanan --}}
+            <div class="flex items-start gap-4">
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-900">Dashboard Admin</h1>
+                    <p class="text-sm text-gray-600">Kelola & pantau seluruh proses KP dengan cepat.</p>
+                </div>
+                <div class="flex items-center gap-3 px-4 py-2 rounded-full border bg-white shadow-sm self-start">
+                    <div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-semibold">
+                        {{ strtoupper(Str::substr(auth()->user()->nama ?? 'A', 0, 1)) }}
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-gray-900">{{ auth()->user()->nama ?? 'Admin' }}</p>
+                        <p class="text-xs text-gray-500">{{ auth()->user()->email ?? '' }}</p>
+                    </div>
+                </div>
             </div>
 
-            @include('admin.monitoring._content')
+            {{-- Informasi & Pengumuman --}}
+            <div class="space-y-3 text-sm">
+                <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                    <span class="text-pink-500">📢</span> Informasi & Pengumuman
+                </h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-4 shadow-sm">
+                        <div class="flex gap-3 items-start text-blue-800">
+                            <span class="text-xl">👋</span>
+                            <div>
+                                <p class="font-semibold text-blue-900 text-base">Selamat datang di dashboard Admin!</p>
+                                <p class="text-blue-800 mt-1">
+                                    Anda memiliki akses penuh untuk mengelola sistem KP. Pastikan semua pengguna memiliki role yang sesuai dengan tugasnya.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
+                        <div class="flex gap-3 items-start text-emerald-800">
+                            <span class="text-xl">💡</span>
+                            <div>
+                                <p class="font-semibold text-emerald-900 text-base">Tips Pengelolaan Sistem</p>
+                                <ul class="text-emerald-800 mt-1 list-disc list-inside space-y-1">
+                                    <li>Pastikan setiap pengguna memiliki role yang tepat</li>
+                                    <li>Monitor aktivitas KP secara berkala</li>
+                                    <li>Backup data sistem secara rutin</li>
+                                    <li>Update informasi kontak dosen dan mahasiswa</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            {{-- Konten utama (gunakan data lama) --}}
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+                @include('admin.monitoring._content')
+            </div>
         </div>
     </div>
 </x-app-layout>
