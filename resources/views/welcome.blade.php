@@ -82,7 +82,7 @@
       <div class="md:w-1/2 text-center md:text-left">
         <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-snug">
           Sistem Informasi <br>
-          <span class="text-[var(--primary-blue)]">Kerja Praktek</span> Online
+          <span class="text-[var(--primary-blue)]">Kerja Praktek</span>
         </h1>
         <p class="mt-4 text-gray-600 text-lg">
           Mudahkan proses pengajuan, bimbingan, dan laporan Kerja Praktek di Universitas Bengkulu dengan sistem digital yang cepat dan transparan.
