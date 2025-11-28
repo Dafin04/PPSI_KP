@@ -1,77 +1,102 @@
-@extends('layouts.app')
-
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Kelola Lowongan KP') }}
-        </h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Kelola Lowongan KP</h2>
     </x-slot>
 
-    <div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-    <div class="p-6 text-gray-900">
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-2xl font-bold">Daftar Lowongan KP</h1>
-            <a href="{{ route('admin.lowongan.create') }}"
-               class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700">
-                Tambah Lowongan Baru
-            </a>
+    <div class="py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm">
+                <div class="p-6 border-b border-gray-100 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Data Lowongan KP</h3>
+                        <p class="text-sm text-gray-500">Daftar lowongan Kerja Praktek</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <form method="GET" action="{{ route('admin.lowongan.index') }}" class="relative w-full sm:w-64">
+                            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                            </span>
+                            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari lowongan..."
+                                   class="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500" />
+                        </form>
+                        <a href="{{ route('admin.lowongan.create') }}"
+                           class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow hover:bg-blue-700 transition">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            Tambah Lowongan
+                        </a>
+                    </div>
+                </div>
+
+                @if(session('success'))
+                    <div class="mx-6 mt-4 bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-xl">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                <div class="mt-4 overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                <th class="px-6 py-3">Instansi</th>
+                                <th class="px-6 py-3">Judul</th>
+                                <th class="px-6 py-3">Kuota</th>
+                                <th class="px-6 py-3">Mulai</th>
+                                <th class="px-6 py-3">Selesai</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse($lowongans as $lowongan)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-gray-900 font-medium">{{ $lowongan->instansi->nama_instansi ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-gray-700">
+                                        <div class="font-semibold text-gray-900">{{ $lowongan->judul_lowongan }}</div>
+                                        <p class="text-xs text-gray-500">{{ Str::limit($lowongan->deskripsi, 70) }}</p>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-700">{{ $lowongan->jumlah_kuota }}</td>
+                                    <td class="px-6 py-4 text-gray-700">{{ optional($lowongan->tanggal_mulai)->format('d-m-Y') }}</td>
+                                    <td class="px-6 py-4 text-gray-700">{{ optional($lowongan->tanggal_selesai)->format('d-m-Y') }}</td>
+                                    <td class="px-6 py-4">
+                                        @if($lowongan->status_aktif)
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Aktif</span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Tidak Aktif</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                                        <div class="inline-flex items-center gap-2">
+                                            <a href="{{ route('admin.lowongan.edit', $lowongan) }}" class="p-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-50" title="Edit">
+                                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
+                                                <span class="sr-only">Edit</span>
+                                            </a>
+                                            <form action="{{ route('admin.lowongan.destroy', $lowongan) }}" method="POST" class="inline-block" onsubmit="event.preventDefault(); if (confirm('Yakin ingin menghapus lowongan ini?')) this.submit();">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="p-2 rounded-lg border border-red-200 text-red-700 hover:bg-red-50" title="Hapus">
+                                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                                                    <span class="sr-only">Hapus</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="px-6 py-6 text-center text-gray-500">
+                                        Tidak ada data lowongan.
+                                        <a href="{{ route('admin.lowongan.create') }}" class="text-blue-600 font-semibold hover:underline ml-1">Tambah lowongan</a>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-6">
+                    {{ $lowongans->links() }}
+                </div>
+            </div>
         </div>
-
-    @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    <table class="min-w-full table-auto border border-gray-200 text-sm">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="py-2 px-4 border-b text-left">Instansi</th>
-                <th class="py-2 px-4 border-b text-left">Judul Lowongan</th>
-                <th class="py-2 px-4 border-b text-left">Deskripsi</th>
-                <th class="py-2 px-4 border-b text-left">Kuota</th>
-                <th class="py-2 px-4 border-b text-left">Tanggal Mulai</th>
-                <th class="py-2 px-4 border-b text-left">Tanggal Selesai</th>
-                <th class="py-2 px-4 border-b text-left">Status</th>
-                <th class="py-2 px-4 border-b text-left">Aksi</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            @foreach($lowongans as $lowongan)
-            <tr class="hover:bg-gray-50">
-                <td class="py-2 px-4 border-b">{{ $lowongan->instansi->nama_instansi }}</td>
-                <td class="py-2 px-4 border-b">{{ $lowongan->judul_lowongan }}</td>
-                <td class="py-2 px-4 border-b">{{ Str::limit($lowongan->deskripsi, 50) }}</td>
-                <td class="py-2 px-4 border-b">{{ $lowongan->jumlah_kuota }}</td>
-                <td class="py-2 px-4 border-b">{{ $lowongan->tanggal_mulai->format('d-m-Y') }}</td>
-                <td class="py-2 px-4 border-b">{{ $lowongan->tanggal_selesai->format('d-m-Y') }}</td>
-                <td class="py-2 px-4 border-b">
-                    @if($lowongan->status_aktif)
-                        <span class="text-green-600 font-semibold">Aktif</span>
-                    @else
-                        <span class="text-red-600 font-semibold">Tidak Aktif</span>
-                    @endif
-                </td>
-                <td class="py-2 px-4 border-b">
-                    <a href="{{ route('admin.lowongan.edit', $lowongan) }}" class="inline-flex items-center px-3 py-1 rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-medium mr-2">Edit</a>
-                    <form action="{{ route('admin.lowongan.destroy', $lowongan) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus lowongan ini?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="inline-flex items-center px-3 py-1 rounded-md border border-red-200 text-red-700 hover:bg-red-50 text-xs font-medium">Hapus</button>
-                    </form>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <div class="mt-4">
-        {{ $lowongans->links() }}
-    </div>
-    </div>
-    </div>
-    </div>
     </div>
 </x-app-layout>

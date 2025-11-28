@@ -257,9 +257,22 @@ class AdminController extends Controller
     }
 
     // CRUD Instansi
-    public function indexInstansi()
+    public function indexInstansi(Request $request)
     {
-        $instansis = Instansi::orderBy('nama_instansi')->paginate(15);
+        $query = Instansi::query();
+
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_instansi', 'like', "%{$search}%")
+                  ->orWhere('kontak', 'like', "%{$search}%")
+                  ->orWhere('kontak_person', 'like', "%{$search}%")
+                  ->orWhere('kota', 'like', "%{$search}%")
+                  ->orWhere('provinsi', 'like', "%{$search}%");
+            });
+        }
+
+        $instansis = $query->orderBy('nama_instansi')->paginate(15)->withQueryString();
         return view('admin.instansi.index', compact('instansis'));
     }
 

@@ -1,65 +1,76 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Kelola Pengguna') }}
-        </h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Kelola Pengguna</h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900">Kelola Pengguna</h3>
+    <div class="py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm">
+                <div class="p-6 border-b border-gray-100 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Kelola akun dan role pengguna</p>
+                        <h3 class="text-lg font-semibold text-gray-900">Data Pengguna</h3>
                     </div>
-
-                    <div class="flex items-center justify-end mb-4">
-                        <a href="{{ route('admin.users.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700">
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <form method="GET" action="{{ route('admin.users') }}" class="relative w-full sm:w-64">
+                            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                            </span>
+                            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama/email..."
+                                   class="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500" />
+                        </form>
+                        <a href="{{ route('admin.users.create') }}"
+                           class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow hover:bg-blue-700 transition">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                             Tambah Pengguna
                         </a>
                     </div>
+                </div>
 
-                    @if(session('success'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full table-auto border border-gray-200 text-sm">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="px-4 py-2 text-left border-b">Nama</th>
-                                    <th class="px-4 py-2 text-left border-b">Email</th>
-                                    <th class="px-4 py-2 text-left border-b">Role Saat Ini</th>
-                                    <th class="px-4 py-2 text-left border-b">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                @foreach($users as $user)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-2 border-b">{{ $user->name }}</td>
-                                        <td class="px-4 py-2 border-b">{{ $user->email }}</td>
-                                        <td class="px-4 py-2 border-b">
-                                            @if($user->roles->count() > 0)
-                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
-                                                    {{ $user->roles->first()->name }}
-                                                </span>
-                                            @else
-                                                <span class="text-gray-500">Tidak ada role</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-2 border-b">
-                                            <button onclick="openModal({{ $user->id }}, '{{ $user->name }}')"
-                                                    class="inline-flex items-center px-3 py-1 rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-medium">
-                                                Ubah Role
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                @if(session('success'))
+                    <div class="mx-6 mt-4 bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-xl">
+                        {{ session('success') }}
                     </div>
+                @endif
+
+                <div class="mt-4 overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                <th class="px-6 py-3">Nama</th>
+                                <th class="px-6 py-3">Email</th>
+                                <th class="px-6 py-3">Role</th>
+                                <th class="px-6 py-3 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @foreach($users as $user)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-gray-900 font-medium">{{ $user->name }}</td>
+                                    <td class="px-6 py-4 text-gray-700">{{ $user->email }}</td>
+                                    <td class="px-6 py-4">
+                                        @if($user->roles->count() > 0)
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+                                                {{ $user->roles->first()->name }}
+                                            </span>
+                                        @else
+                                            <span class="text-gray-500 text-sm">Tidak ada role</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                                        <button onclick="openModal({{ $user->id }}, '{{ $user->name }}')" class="p-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-50" title="Ubah role">
+                                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
+                                            <span class="sr-only">Ubah role</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-6">
+                    {{ $users->links() }}
                 </div>
             </div>
         </div>
@@ -67,32 +78,32 @@
 
     <!-- Modal -->
     <div id="roleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Ubah Role untuk: <span id="userName"></span></h3>
-                <form id="roleForm" method="POST">
-                    @csrf
-                    <input type="hidden" id="userId" name="user_id">
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="role_id">
-                            Pilih Role Baru:
-                        </label>
-                        <select name="role_id" id="role_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            @foreach($roles as $role)
-                                <option value="{{ $role->id }}">{{ $role->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="flex justify-end">
-                        <button type="button" onclick="closeModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">
-                            Batal
-                        </button>
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            Simpan
-                        </button>
-                    </div>
-                </form>
+        <div class="relative top-20 mx-auto p-5 w-full max-w-md shadow-lg rounded-xl bg-white">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <p class="text-sm text-gray-500">Pilih role baru</p>
+                    <h3 class="text-lg font-semibold text-gray-900">Ubah Role: <span id="userName"></span></h3>
+                </div>
+                <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-700">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
             </div>
+            <form id="roleForm" method="POST" class="space-y-4">
+                @csrf
+                <input type="hidden" id="userId" name="user_id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="role_id">Role Baru</label>
+                    <select name="role_id" id="role_id" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm">
+                        @foreach($roles as $role)
+                            <option value="{{ $role->id }}">{{ $role->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-100">Simpan</button>
+                </div>
+            </form>
         </div>
     </div>
 

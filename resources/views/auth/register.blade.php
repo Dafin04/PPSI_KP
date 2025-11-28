@@ -1,74 +1,101 @@
 <x-guest-layout>
-    <div class="min-h-[80vh] grid grid-cols-1 lg:grid-cols-2 gap-6 bg-gray-50 rounded-2xl overflow-hidden">
-        <!-- Left brand -->
-        <div class="hidden lg:flex bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-600 text-white items-center justify-center p-12">
-            <div class="max-w-md">
-                <h1 class="text-3xl font-semibold leading-tight">Buat Akun Baru</h1>
-                <p class="mt-3 text-blue-100">Daftar untuk memulai pengelolaan Kerja Praktek dengan mudah dan cepat.</p>
-                <ul class="mt-6 space-y-2 text-blue-50 text-sm">
-                    <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-white"></span> Antarmuka modern</li>
-                    <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-white"></span> Responsif semua perangkat</li>
-                    <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-white"></span> Didukung Tailwind CSS</li>
-                </ul>
+    <div class="min-h-screen grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[3fr_5fr] bg-gray-100">
+        {{-- Kolom kiri: form --}}
+        <div class="flex items-center justify-center px-6 py-10 lg:px-14 bg-white">
+            <div class="w-full max-w-2xl space-y-8">
+                <div class="flex items-center gap-3 justify-start">
+                    <div class="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-10 w-10 object-contain">
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-blue-700">Sistem Informasi Kerja Praktek</p>
+                        <h2 class="text-lg font-bold text-gray-900">Buat Akun</h2>
+                    </div>
+                </div>
+
+                <div>
+                    <h1 class="text-3xl font-semibold text-gray-900">Mulai Kelola KP</h1>
+                    <p class="text-sm text-gray-600 mt-1">Daftarkan akun untuk pendaftaran KP, bimbingan, seminar, hingga nilai akhir.</p>
+                </div>
+
+                <div class="rounded-2xl border border-gray-100 bg-white shadow-sm p-6 space-y-5">
+                    <form method="POST" action="{{ route('register') }}" class="space-y-4">
+                        @csrf
+
+                        <div class="space-y-1">
+                            <label for="name" class="block text-sm font-semibold text-gray-700">Nama Lengkap</label>
+                            <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus autocomplete="name"
+                                   class="block w-full rounded-xl border border-gray-200 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                            @error('name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-1">
+                            <label for="email" class="block text-sm font-semibold text-gray-700">Email Kampus</label>
+                            <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="username"
+                                   class="block w-full rounded-xl border border-gray-200 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                            @error('email')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-1">
+                            <label for="password" class="block text-sm font-semibold text-gray-700">Kata Sandi</label>
+                            <input id="password" name="password" type="password" required autocomplete="new-password"
+                                   class="block w-full rounded-xl border border-gray-200 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                            @error('password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-1">
+                            <label for="password_confirmation" class="block text-sm font-semibold text-gray-700">Konfirmasi Kata Sandi</label>
+                            <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password"
+                                   class="block w-full rounded-xl border border-gray-200 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                            @error('password_confirmation')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <button type="submit" class="w-full inline-flex justify-center items-center rounded-xl bg-orange-500 text-white px-6 py-3 font-semibold shadow-md hover:bg-orange-600 focus:ring-4 focus:ring-orange-100 transition">
+                            Daftar Sekarang
+                        </button>
+
+                        <p class="text-center text-sm text-gray-600 pt-2">Sudah punya akun?
+                            <a href="{{ route('login') }}" class="font-semibold text-blue-700 hover:text-orange-600 hover:underline transition">Masuk</a>
+                        </p>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- Right form -->
-        <div class="flex items-center justify-center p-6 lg:p-10">
-            <div class="w-full max-w-md">
-                <div class="bg-white border border-gray-100 shadow-sm rounded-xl p-6 sm:p-8">
-                    <div class="mb-6 text-center">
-                        <h2 class="text-2xl font-semibold text-gray-900">Daftar</h2>
-                        <p class="text-sm text-gray-500 mt-1">Isi data berikut untuk membuat akun</p>
+        {{-- Kolom kanan: hero --}}
+        <div class="hidden lg:flex relative">
+            <div class="absolute inset-0"
+                 style="background: linear-gradient(135deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25)), url('{{ asset('images/unibb.png') }}'); background-size: cover; background-position: center left;">
+            </div>
+            <div class="relative z-10 flex flex-col justify-between p-12 lg:p-16 text-white w-full">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold uppercase tracking-wide border border-white/20">
+                        Portal Resmi Kerja Praktek
                     </div>
-
-                    <form method="POST" action="{{ route('register') }}" class="space-y-5">
-                        @csrf
-
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                            <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus autocomplete="name"
-                                   class="mt-2 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
-                            @error('name')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                            <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="username"
-                                   class="mt-2 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
-                            @error('email')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                            <input id="password" name="password" type="password" required autocomplete="new-password"
-                                   class="mt-2 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
-                            @error('password')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Konfirmasi Password</label>
-                            <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password"
-                                   class="mt-2 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
-                            @error('password_confirmation')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <button type="submit" class="w-full inline-flex justify-center items-center rounded-lg bg-blue-600 text-white px-4 py-2.5 font-medium hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition">
-                            Daftar
-                        </button>
-
-                        <p class="text-center text-sm text-gray-600">Sudah punya akun?
-                            <a href="{{ route('login') }}" class="font-medium text-blue-700 hover:underline">Masuk</a>
-                        </p>
-                    </form>
+                    <h1 class="mt-6 text-4xl lg:text-5xl font-bold leading-tight">
+                        Bangun Profil KP dan Mulai Kolaborasi.
+                    </h1>
+                    <p class="mt-4 text-base text-blue-100 max-w-xl">
+                        Satu portal untuk pendaftaran, bimbingan, seminar, revisi, hingga nilai akhir. Mudahkan koordinasi mahasiswa, dosen, dan pembimbing lapangan.
+                    </p>
+                </div>
+                <div class="flex items-center gap-4 text-sm text-blue-100/90">
+                    <div class="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur-md border border-white/20 shadow">
+                        <div class="font-semibold text-white">Keamanan Data</div>
+                        <div class="text-blue-100 text-xs">Terenkripsi & Valid</div>
+                    </div>
+                    <div class="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur-md border border-white/20 shadow">
+                        <div class="font-semibold text-white">Akses Cepat</div>
+                        <div class="text-blue-100 text-xs">Terintegrasi Akademik</div>
+                    </div>
                 </div>
             </div>
         </div>

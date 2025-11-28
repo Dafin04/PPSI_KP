@@ -12,9 +12,22 @@ class LowonganController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $lowongans = Lowongan::with('instansi')->paginate(10);
+        $query = Lowongan::with('instansi');
+
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('judul_lowongan', 'like', "%{$search}%")
+                  ->orWhere('deskripsi', 'like', "%{$search}%")
+                  ->orWhereHas('instansi', function ($q2) use ($search) {
+                      $q2->where('nama_instansi', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $lowongans = $query->orderBy('judul_lowongan')->paginate(10)->withQueryString();
         return view('admin.lowongan.index', compact('lowongans'));
     }
 

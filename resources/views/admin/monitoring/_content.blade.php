@@ -76,22 +76,47 @@
                 </div>
                 <span class="text-xs text-gray-500">Total: {{ $totalKP }}</span>
             </div>
-            <div class="space-y-4">
-                @foreach($items as $key => $val)
-                    @php
-                        $label = $labels[$key] ?? ucfirst($key ?: 'Tidak diketahui');
-                        $pct = round(($val / $totalAll) * 100);
-                    @endphp
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-sm text-gray-700">
-                            <span>{{ $label }}</span>
-                            <span class="font-semibold text-gray-900">{{ $val }} mhs</span>
-                        </div>
-                        <div class="h-2.5 rounded-full bg-gray-100 overflow-hidden">
-                            <div class="h-full {{ $colors[$key] ?? 'bg-gray-400' }}" style="width: {{ $pct }}%"></div>
-                        </div>
+            @php
+                $pieColors = [
+                    'diajukan' => '#f97316',
+                    'berlangsung' => '#1d4ed8',
+                    'selesai' => '#10b981',
+                    'ditolak' => '#ef4444',
+                ];
+                $segments = [];
+                $start = 0;
+                foreach($items as $key => $val){
+                    $pct = $totalAll ? ($val / $totalAll) * 100 : 0;
+                    $end = $start + $pct;
+                    $segments[] = ($pieColors[$key] ?? '#e5e7eb') . ' ' . $start . '% ' . $end . '%';
+                    $start = $end;
+                }
+                if ($start < 100) {
+                    $segments[] = '#e5e7eb ' . $start . '% 100%';
+                }
+                $gradient = implode(', ', $segments);
+            @endphp
+            <div class="flex flex-col md:flex-row md:items-center md:gap-6">
+                <div class="flex-1 flex justify-center">
+                    <div class="w-56 h-56 rounded-full border border-gray-100 shadow-inner overflow-hidden relative">
+                        <div class="absolute inset-0" style="background-image: conic-gradient({{ $gradient }});"></div>
                     </div>
-                @endforeach
+                </div>
+                <div class="flex-1 space-y-3">
+                    @foreach($labels as $k => $label)
+                        @php
+                            $val = $items[$k] ?? 0;
+                            $pct = $totalAll ? round(($val / $totalAll) * 100) : 0;
+                        @endphp
+                        <div class="flex items-center justify-between text-sm text-gray-700">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full" style="background-color: {{ $pieColors[$k] ?? '#e5e7eb' }}"></span>
+                                <span>{{ $label }}</span>
+                            </div>
+                            <span class="font-semibold text-gray-900">{{ $pct }}%</span>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
 

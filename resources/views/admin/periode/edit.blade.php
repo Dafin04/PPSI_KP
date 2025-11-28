@@ -1,67 +1,72 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Edit Periode KP</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Periode KP') }}</h2>
     </x-slot>
 
     <div class="py-10">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm rounded-lg border border-gray-200">
-                <div class="p-6 space-y-6">
-                    @if($errors->any())
-                        <div class="bg-red-100 border border-red-200 text-red-700 px-4 py-2 rounded">
-                            <ul class="list-disc list-inside text-sm">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm">
+                <div class="p-6 border-b border-gray-100">
+                    <p class="text-sm text-gray-500">Formulir perubahan periode</p>
+                    <h3 class="text-lg font-semibold text-gray-900">Edit Periode KP</h3>
+                </div>
+                <div class="p-6 text-gray-900">
+                    <form action="{{ route('admin.periode.update', $periodeKp) }}" method="POST" class="space-y-6">
+                        @csrf
+                        @method('PUT')
 
-                    <form method="POST" action="{{ route('admin.periode.update', $periodeKp) }}" class="space-y-4">
-                        @csrf @method('PUT')
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Tahun Ajaran <span class="text-red-500">*</span></label>
-                                <input name="tahun_ajaran" type="text" value="{{ old('tahun_ajaran', $periodeKp->tahun_ajaran) }}" required class="mt-1 block w-full rounded-md border-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tahun Ajaran</label>
+                                <input type="text" name="tahun_ajaran" value="{{ old('tahun_ajaran', $periodeKp->tahun_ajaran) }}" placeholder="2024/2025"
+                                       class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" required>
+                                @error('tahun_ajaran') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Semester <span class="text-red-500">*</span></label>
-                                <select name="semester" class="mt-1 block w-full rounded-md border-gray-300">
-                                    <option value="Ganjil" @selected(old('semester', $periodeKp->semester)==='Ganjil')>Ganjil</option>
-                                    <option value="Genap" @selected(old('semester', $periodeKp->semester)==='Genap')>Genap</option>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                                <select name="semester" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" required>
+                                    <option value="">Pilih</option>
+                                    <option value="Ganjil" @selected(old('semester', $periodeKp->semester)=='Ganjil')>Ganjil</option>
+                                    <option value="Genap" @selected(old('semester', $periodeKp->semester)=='Genap')>Genap</option>
                                 </select>
+                                @error('semester') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
-                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Tgl Mulai Pendaftaran</label>
-                                <input name="tgl_mulai_pendaftaran" type="date" value="{{ old('tgl_mulai_pendaftaran', optional($periodeKp->tgl_mulai_pendaftaran)->format('Y-m-d')) }}" class="mt-1 block w-full rounded-md border-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai Pendaftaran</label>
+                                <input type="date" name="tgl_mulai_pendaftaran" value="{{ old('tgl_mulai_pendaftaran', optional($periodeKp->tgl_mulai_pendaftaran)->format('Y-m-d')) }}"
+                                       class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" required>
+                                @error('tgl_mulai_pendaftaran') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Tgl Selesai Pendaftaran</label>
-                                <input name="tgl_selesai_pendaftaran" type="date" value="{{ old('tgl_selesai_pendaftaran', optional($periodeKp->tgl_selesai_pendaftaran)->format('Y-m-d')) }}" class="mt-1 block w-full rounded-md border-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Selesai Pendaftaran</label>
+                                <input type="date" name="tgl_selesai_pendaftaran" value="{{ old('tgl_selesai_pendaftaran', optional($periodeKp->tgl_selesai_pendaftaran)->format('Y-m-d')) }}"
+                                       class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" required>
+                                @error('tgl_selesai_pendaftaran') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                <select name="status" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" required>
+                                    <option value="Aktif" @selected(old('status', $periodeKp->status)=='Aktif')>Aktif</option>
+                                    <option value="Ditutup" @selected(old('status', $periodeKp->status)=='Ditutup')>Ditutup</option>
+                                    <option value="Arsip" @selected(old('status', $periodeKp->status)=='Arsip')>Arsip</option>
+                                </select>
+                                @error('status') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan (Opsional)</label>
+                                <input type="text" name="keterangan" value="{{ old('keterangan', $periodeKp->keterangan) }}"
+                                       class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" placeholder="Catatan periode">
+                                @error('keterangan') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Status</label>
-                            <select name="status" class="mt-1 block w-full rounded-md border-gray-300">
-                                @foreach(['Aktif','Ditutup','Arsip'] as $status)
-                                    <option value="{{ $status }}" @selected(old('status', $periodeKp->status)===$status)>{{ $status }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Keterangan</label>
-                            <textarea name="keterangan" rows="3" class="mt-1 block w-full rounded-md border-gray-300">{{ old('keterangan', $periodeKp->keterangan) }}</textarea>
-                        </div>
-
-                        <div class="flex justify-end gap-3">
-                            <a href="{{ route('admin.periode.index') }}" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 text-sm hover:bg-gray-50">Batal</a>
-                            <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700">Simpan Perubahan</button>
+                        <div class="flex items-center justify-end gap-3">
+                            <a href="{{ route('admin.periode.index') }}" class="text-gray-600 hover:text-gray-900 font-semibold">Batal</a>
+                            <button type="submit" class="inline-flex items-center px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-100">
+                                Simpan Perubahan
+                            </button>
                         </div>
                     </form>
                 </div>
