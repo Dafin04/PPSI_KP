@@ -6,6 +6,7 @@ use App\Models\Nilai;
 use App\Models\Kuesioner;
 use App\Models\Kuota;
 use App\Models\Instansi;
+use App\Models\Mahasiswa;
 use App\Services\SertifikatKpGenerator;
 use Illuminate\Http\Request;
 
@@ -144,15 +145,24 @@ class PembimbingLapanganController extends Controller
             'saran_kemampuan' => $validated['saran_kemampuan'] ?? '',
         ];
 
+        $kepuasan = in_array($validated['manfaat'], ['baik', 'sangat']) ? 'puas' : 'tidak_puas';
+
+        $mahasiswaId = Mahasiswa::where('user_id', auth()->id())->value('id')
+            ?? Mahasiswa::value('id'); // fallback ke mahasiswa pertama yang ada
+
+        if (!$mahasiswaId) {
+            return back()->withErrors(['mahasiswa_id' => 'Data mahasiswa belum tersedia.'])->withInput();
+        }
+
         $kuesioner = Kuesioner::create([
             'pembimbing_lapangan_id' => auth()->id(),
-            'mahasiswa_id' => null,
+            'mahasiswa_id' => $mahasiswaId,
             'isi_kuesioner' => json_encode($payload),
             'tipe' => 'instansi',
             'kuota_tahun_depan' => $validated['jumlah_mahasiswa'] ?? null,
             'saran_kegiatan' => $validated['saran_matkul'] ?? '',
             'kebutuhan_skill' => $validated['saran_kemampuan'] ?? '',
-            'tingkat_kepuasan' => $validated['manfaat'] ?? null,
+            'tingkat_kepuasan' => $kepuasan,
         ]);
 
         $user = auth()->user();
@@ -218,12 +228,14 @@ class PembimbingLapanganController extends Controller
             'saran_kemampuan' => $validated['saran_kemampuan'] ?? '',
         ];
 
+        $kepuasan = in_array($validated['manfaat'], ['baik', 'sangat']) ? 'puas' : 'tidak_puas';
+
         $kuesioner->update([
             'isi_kuesioner' => json_encode($payload),
             'kuota_tahun_depan' => $validated['jumlah_mahasiswa'] ?? null,
             'saran_kegiatan' => $validated['saran_matkul'] ?? '',
             'kebutuhan_skill' => $validated['saran_kemampuan'] ?? '',
-            'tingkat_kepuasan' => $validated['manfaat'] ?? null,
+            'tingkat_kepuasan' => $kepuasan,
         ]);
         return redirect()->route('lapangan.kuesioner.index')->with('success', 'Kuesioner diperbarui.');
     }

@@ -21,29 +21,36 @@ class KerjaPraktekController extends Controller
     /**
      * Display a listing of KP registrations
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $search = $request->q;
 
         if ($user->hasRole('admin')) {
-            $kerjaPrakteks = KerjaPraktek::with(['mahasiswa', 'instansi', 'dosenPembimbing', 'pengawasLapangan'])
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
+            $query = KerjaPraktek::with(['mahasiswa', 'instansi', 'dosenPembimbing', 'pengawasLapangan'])
+                ->orderBy('created_at', 'desc');
         } elseif ($user->hasRole('dosen-biasa')) {
-            $kerjaPrakteks = KerjaPraktek::with(['mahasiswa', 'instansi', 'pengawasLapangan'])
+            $query = KerjaPraktek::with(['mahasiswa', 'instansi', 'pengawasLapangan'])
                 ->where('dosen_pembimbing_id', $user->id)
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
+                ->orderBy('created_at', 'desc');
         } elseif ($user->hasRole('mahasiswa')) {
-            $kerjaPrakteks = KerjaPraktek::with(['instansi', 'dosenPembimbing', 'pengawasLapangan'])
+            $query = KerjaPraktek::with(['instansi', 'dosenPembimbing', 'pengawasLapangan'])
                 ->where('mahasiswa_id', $user->id)
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
+                ->orderBy('created_at', 'desc');
         } else {
             abort(403, 'Akses ditolak');
         }
 
-        return view('kerja-praktek.index', compact('kerjaPrakteks'));
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('judul_kp', 'like', "%{$search}%")
+                  ->orWhereHas('instansi', fn($i) => $i->where('nama_instansi', 'like', "%{$search}%"));
+            });
+        }
+
+        $kerjaPrakteks = $query->paginate(15)->withQueryString();
+
+        return view('kerja-praktek.index', compact('kerjaPrakteks', 'search'));
     }
 
     /**

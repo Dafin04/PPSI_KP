@@ -132,14 +132,6 @@ Route::middleware(['auth', 'role:mahasiswa'])->prefix('mahasiswa')->name('mahasi
     // Nilai view
     Route::get('/nilai', [MahasiswaController::class, 'nilai'])->name('nilai');
 
-    // Kuesioner management
-    Route::get('/kuesioner', [MahasiswaController::class, 'indexKuesioner'])->name('kuesioner.index');
-    Route::get('/kuesioner/create', [MahasiswaController::class, 'createKuesioner'])->name('kuesioner.create');
-    Route::post('/kuesioner', [MahasiswaController::class, 'storeKuesioner'])->name('kuesioner.store');
-    Route::get('/kuesioner/{kuesioner}/edit', [MahasiswaController::class, 'editKuesioner'])->name('kuesioner.edit');
-    Route::put('/kuesioner/{kuesioner}', [MahasiswaController::class, 'updateKuesioner'])->name('kuesioner.update');
-    Route::delete('/kuesioner/{kuesioner}', [MahasiswaController::class, 'destroyKuesioner'])->name('kuesioner.destroy');
-
     // Seminar (mahasiswa mengajukan jadwal)
     Route::get('/seminar', [MahasiswaController::class, 'indexSeminar'])->name('seminar.index');
     Route::get('/seminar/create', [MahasiswaController::class, 'createSeminar'])->name('seminar.create');

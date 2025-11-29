@@ -419,12 +419,33 @@ class MahasiswaController extends Controller
     // ======================
     // INSTANSI CRUD
     // ======================
-    public function indexInstansi()
+    public function indexInstansi(Request $request)
     {
-        $instansis = Instansi::with('kuotas')->orderBy('nama_instansi')->get();
-        $lowonganAktif = Lowongan::with('instansi')->orderBy('tanggal_mulai')->get();
+        $search = $request->q;
 
-        return view('mahasiswa.instansi.index', compact('instansis', 'lowonganAktif'));
+        $instansis = Instansi::with('kuotas')
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('nama_instansi', 'like', "%{$search}%")
+                        ->orWhere('kota', 'like', "%{$search}%")
+                        ->orWhere('provinsi', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('nama_instansi')
+            ->get();
+
+        $lowonganAktif = Lowongan::with('instansi')
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('judul_lowongan', 'like', "%{$search}%")
+                        ->orWhere('kebutuhan_keahlian', 'like', "%{$search}%")
+                        ->orWhereHas('instansi', fn($i) => $i->where('nama_instansi', 'like', "%{$search}%"));
+                });
+            })
+            ->orderBy('tanggal_mulai')
+            ->get();
+
+        return view('mahasiswa.instansi.index', compact('instansis', 'lowonganAktif', 'search'));
     }
 
     public function createInstansi()
