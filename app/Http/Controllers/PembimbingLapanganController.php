@@ -19,7 +19,16 @@ class PembimbingLapanganController extends Controller
 
     public function dashboard()
     {
-        return view('pembimbing-lapangan.dashboard');
+        $userId = auth()->id();
+        $nilaiCount = Nilai::where('pembimbing_lapangan_id', $userId)->count();
+        $kuesionerCount = Kuesioner::where('pembimbing_lapangan_id', $userId)->count();
+        // tabel kuotas tidak menyimpan pembimbing, cukup total
+        $kuotaCount = Kuota::count();
+        $instansiCount = Instansi::count();
+
+        return view('pembimbing-lapangan.dashboard', compact(
+            'nilaiCount', 'kuesionerCount', 'kuotaCount', 'instansiCount'
+        ));
     }
 
     // CRUD Nilai (penilaian mahasiswa)

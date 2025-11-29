@@ -28,7 +28,6 @@
             'total' => $row->total,
         ]);
 
-    $totalAll = max(1, (int) ($totalKP ?? 0));
     $statusOrder = ['diajukan','berlangsung','selesai','ditolak'];
     $labels = [
         'diajukan' => 'Diajukan',
@@ -45,6 +44,7 @@
     $items = [];
     foreach ($statusOrder as $k) { $items[$k] = (int) ($kpByStatus[$k] ?? 0); }
     foreach (($kpByStatus ?? []) as $k => $v) { if (!array_key_exists($k, $items)) { $items[$k] = (int) $v; } }
+    $totalAll = max(1, array_sum($items));
 @endphp
 
 <!-- Ringkasan modern tanpa tabel -->
@@ -85,20 +85,23 @@
                 ];
                 $segments = [];
                 $start = 0;
+                $lastColor = '#1d4ed8';
                 foreach($items as $key => $val){
                     $pct = $totalAll ? ($val / $totalAll) * 100 : 0;
                     $end = $start + $pct;
-                    $segments[] = ($pieColors[$key] ?? '#e5e7eb') . ' ' . $start . '% ' . $end . '%';
+                    $color = $pieColors[$key] ?? '#e5e7eb';
+                    if ($pct > 0) { $lastColor = $color; }
+                    $segments[] = $color . ' ' . $start . '% ' . $end . '%';
                     $start = $end;
                 }
                 if ($start < 100) {
-                    $segments[] = '#e5e7eb ' . $start . '% 100%';
+                    $segments[] = ($lastColor ?: '#1d4ed8') . ' ' . $start . '% 100%';
                 }
                 $gradient = implode(', ', $segments);
             @endphp
             <div class="flex flex-col md:flex-row md:items-center md:gap-6">
                 <div class="flex-1 flex justify-center">
-                    <div class="w-56 h-56 rounded-full border border-gray-100 shadow-inner overflow-hidden relative">
+                    <div class="w-44 h-44 rounded-full border border-gray-100 shadow-inner overflow-hidden relative">
                         <div class="absolute inset-0" style="background-image: conic-gradient({{ $gradient }});"></div>
                     </div>
                 </div>

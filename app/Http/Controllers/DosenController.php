@@ -20,12 +20,25 @@ class DosenController extends Controller
     public function dashboard()
     {
         $userId = auth()->id();
-        $totalMahasiswa = \App\Models\KerjaPraktek::where('dosen_pembimbing_id', $userId)->distinct('mahasiswa_id')->count('mahasiswa_id');
-        $kpMembimbingCount = \App\Models\KerjaPraktek::where('dosen_pembimbing_id', $userId)->count();
-        $pendingApprovalsCount = \App\Models\KerjaPraktek::where('dosen_pembimbing_id', $userId)->where('status','diajukan')->count();
-        $completedKpCount = \App\Models\KerjaPraktek::where('dosen_pembimbing_id', $userId)->where('status','selesai')->count();
+        $totalMahasiswa = KerjaPraktek::where('dosen_pembimbing_id', $userId)->distinct('mahasiswa_id')->count('mahasiswa_id');
+        $kpMembimbingCount = KerjaPraktek::where('dosen_pembimbing_id', $userId)->count();
+        $pendingApprovalsCount = KerjaPraktek::where('dosen_pembimbing_id', $userId)->where('status','diajukan')->count();
+        $completedKpCount = KerjaPraktek::where('dosen_pembimbing_id', $userId)->where('status','selesai')->count();
 
-        return view('dosen.dashboard', compact('totalMahasiswa','kpMembimbingCount','pendingApprovalsCount','completedKpCount'));
+        $proposalCount = Proposal::where('dosen_id', $userId)->count();
+        $bimbinganCount = Bimbingan::where('dosen_pembimbing_id', $userId)->count();
+        $nilaiCount = Nilai::where('dosen_id', $userId)->count();
+        $seminarCount = Seminar::where(function($q) use ($userId) {
+            $q->where('pembimbing_penguji_id', $userId)
+              ->orWhere('ketua_penguji_id', $userId)
+              ->orWhere('anggota_penguji_1_id', $userId)
+              ->orWhere('anggota_penguji_2_id', $userId);
+        })->count();
+
+        return view('dosen.dashboard', compact(
+            'totalMahasiswa','kpMembimbingCount','pendingApprovalsCount','completedKpCount',
+            'proposalCount','bimbinganCount','nilaiCount','seminarCount'
+        ));
     }
 
     // CRUD Proposal (review dan approval)

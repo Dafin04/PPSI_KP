@@ -56,28 +56,10 @@
                                     </td>
                                     <td class="px-6 py-4 text-gray-700">{{ optional($k->created_at)->format('d M Y') }}</td>
                                     <td class="px-6 py-4 text-right whitespace-nowrap">
-                                        <details class="group">
-                                            <summary class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                                <span>Detail</span>
-                                            </summary>
-                                            <div class="mt-3 space-y-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-4 max-w-xl ml-auto">
-                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                    <div><span class="font-semibold">Kemandirian:</span> {{ Str::replace('_',' ', $payload['kemandirian'] ?? '-') }}</div>
-                                                    <div><span class="font-semibold">Penguasaan Materi & Inggris:</span> {{ Str::replace('_',' ', $payload['penguasaan_materi'] ?? '-') }}</div>
-                                                    <div><span class="font-semibold">Penguasaan SI & Bisnis Digital:</span> {{ Str::replace('_',' ', $payload['penguasaan_si'] ?? '-') }}</div>
-                                                    <div><span class="font-semibold">Kerjasama:</span> {{ Str::replace('_',' ', $payload['kerjasama'] ?? '-') }}</div>
-                                                    <div><span class="font-semibold">Etika:</span> {{ Str::replace('_',' ', $payload['etika'] ?? '-') }}</div>
-                                                    <div><span class="font-semibold">Sinergi Program:</span> {{ $payload['sinergi'] ?? '-' }}</div>
-                                                    <div><span class="font-semibold">Bersedia Tindak Lanjut:</span> {{ ($payload['lanjut'] ?? '') === 'ya' ? 'Ya' : 'Tidak' }}</div>
-                                                    <div><span class="font-semibold">Kuota tahun depan:</span> {{ $payload['jumlah_mahasiswa'] ?? '-' }}</div>
-                                                </div>
-                                                <div class="pt-2 space-y-1">
-                                                    <div><span class="font-semibold">Saran Mata Kuliah:</span> {{ $payload['saran_matkul'] ?? '-' }}</div>
-                                                    <div><span class="font-semibold">Saran Kemampuan:</span> {{ $payload['saran_kemampuan'] ?? '-' }}</div>
-                                                </div>
-                                            </div>
-                                        </details>
+                                        <a href="{{ route('admin.kuesioner.show.admin', $k) }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                            <span>Detail</span>
+                                        </a>
                                     </td>
                                 </tr>
                             @empty

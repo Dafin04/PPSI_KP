@@ -86,7 +86,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Monitoring & laporan
     Route::get('/monitoring', [AdminController::class, 'monitoring'])->name('monitoring');
-    Route::get('/kuesioner-instansi', [AdminController::class, 'kuesionerInstansi'])->name('kuesioner.instansi');
+    // route di atas sudah didefinisikan
+    Route::get('/kuesioner-instansi/{kuesioner}', [AdminController::class, 'kuesionerShow'])->name('kuesioner.show.admin');
     Route::post('/kp/approve-all', [AdminController::class, 'approveAllKerjaPraktek'])->name('kp.approve-all');
     Route::post('/kp/{kerjaPraktek}/hasil', [AdminController::class, 'tetapkanHasil'])->name('kp.hasil');
     Route::get('/kuesioner-instansi', [AdminController::class, 'kuesionerInstansi'])->name('kuesioner.instansi');

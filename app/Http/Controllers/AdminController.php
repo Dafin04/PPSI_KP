@@ -13,6 +13,7 @@ use App\Models\Proposal;
 use App\Models\Role;
 use App\Models\Mahasiswa;
 use App\Models\PendaftaranKP;
+use App\Models\Kuesioner;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
@@ -184,12 +185,34 @@ class AdminController extends Controller
     }
 
     // CRUD User
-    public function indexUsers()
+    public function indexUsers(Request $request)
     {
         $this->ensureBaseRoles();
-        $users = User::with('roles')->paginate(15);
+        $q = $request->input('q');
+        $roleMaps = [
+            'admin' => 'Admin',
+            'mahasiswa' => 'Mahasiswa',
+            'dosen' => 'Dosen',
+            'pembimbing_lapangan' => 'Pembimbing Lapangan',
+        ];
+
+        $usersByRole = [];
+        foreach ($roleMaps as $slug => $label) {
+            $usersByRole[$slug] = User::with('roles')
+                ->whereHas('roles', fn($r) => $r->where('slug', $slug))
+                ->when($q, function ($query) use ($q) {
+                    $query->where(function ($sub) use ($q) {
+                        $sub->where('name', 'like', "%{$q}%")
+                            ->orWhere('email', 'like', "%{$q}%")
+                            ->orWhereHas('roles', fn($r) => $r->where('name', 'like', "%{$q}%"));
+                    });
+                })
+                ->orderBy('name')
+                ->get();
+        }
+
         $roles = Role::all();
-        return view('admin.users', compact('users', 'roles'));
+        return view('admin.users', compact('roles', 'q', 'roleMaps', 'usersByRole'));
     }
 
     public function createUser()
@@ -556,6 +579,15 @@ class AdminController extends Controller
     {
         $query = KerjaPraktek::with(['mahasiswa.mahasiswa', 'dosenPembimbing', 'instansi']);
 
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q2) use ($search) {
+                $q2->whereHas('mahasiswa', fn($m) => $m->where('name', 'like', "%{$search}%"))
+                    ->orWhere('judul_kp', 'like', "%{$search}%")
+                    ->orWhereHas('instansi', fn($i) => $i->where('nama_instansi', 'like', "%{$search}%"));
+            });
+        }
+
         if ($request->filled('instansi_id')) {
             $query->where('instansi_id', $request->instansi_id);
         }
@@ -580,6 +612,7 @@ class AdminController extends Controller
         $filters = [
             'instansi_id' => $request->input('instansi_id'),
             'sort' => $request->input('sort'),
+            'q' => $request->input('q'),
         ];
 
         return view('admin.alokasi.pembimbing', compact('kps', 'dosens', 'instansis', 'filters'));
@@ -682,6 +715,12 @@ class AdminController extends Controller
             ->get();
 
         return view('admin.kuesioner.index', compact('kuesioners'));
+    }
+
+    public function kuesionerShow(Kuesioner $kuesioner)
+    {
+        $payload = json_decode($kuesioner->isi_kuesioner ?? '{}', true) ?? [];
+        return view('admin.kuesioner.show', compact('kuesioner', 'payload'));
     }
 
     public function approveAllKerjaPraktek()

@@ -62,7 +62,7 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div class="space-y-2">
-                                <label for="instansi_id" class="text-sm font-semibold text-gray-800">Instansi</label>
+                                <label for="instansi_id" class="text-sm font-semibold text-gray-800">Instansi (Pilihan KP 1)</label>
                                 <select id="instansi_id" name="instansi_id"
                                         class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                         required>
@@ -91,25 +91,21 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                            <div class="space-y-2">
-                                <label for="pilihan_1" class="text-sm font-semibold text-gray-800">Pilihan Tempat KP 1</label>
-                                <input id="pilihan_1" name="pilihan_1" type="text" value="{{ old('pilihan_1') }}"
-                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                       required>
-                                <x-input-error :messages="$errors->get('pilihan_1')" class="mt-1" />
-                            </div>
+                        <input type="hidden" id="pilihan_1" name="pilihan_1" value="{{ old('pilihan_1') }}">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div class="space-y-2">
                                 <label for="pilihan_2" class="text-sm font-semibold text-gray-800">Pilihan Tempat KP 2 (Opsional)</label>
-                                <input id="pilihan_2" name="pilihan_2" type="text" value="{{ old('pilihan_2') }}"
-                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                <select id="pilihan_2" name="pilihan_2"
+                                        class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                    <option value="">Pilih Instansi</option>
+                                    @foreach($instansis as $instansi)
+                                        <option value="{{ $instansi->nama_instansi }}" {{ old('pilihan_2') == $instansi->nama_instansi ? 'selected' : '' }}>
+                                            {{ $instansi->nama_instansi }} - {{ $instansi->kota }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 <x-input-error :messages="$errors->get('pilihan_2')" class="mt-1" />
-                            </div>
-                            <div class="space-y-2">
-                                <label for="pilihan_3" class="text-sm font-semibold text-gray-800">Pilihan Tempat KP 3 (Opsional)</label>
-                                <input id="pilihan_3" name="pilihan_3" type="text" value="{{ old('pilihan_3') }}"
-                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                                <x-input-error :messages="$errors->get('pilihan_3')" class="mt-1" />
                             </div>
                         </div>
 
@@ -172,3 +168,20 @@
         </div>
     </div>
 </x-app-layout>
+
+@push('scripts')
+<script>
+    const instansiSelect = document.getElementById('instansi_id');
+    const pilihan1Input = document.getElementById('pilihan_1');
+
+    function syncPilihan1() {
+        const selected = instansiSelect.options[instansiSelect.selectedIndex];
+        pilihan1Input.value = selected ? selected.text : '';
+    }
+
+    if (instansiSelect && pilihan1Input) {
+        instansiSelect.addEventListener('change', syncPilihan1);
+        syncPilihan1();
+    }
+</script>
+@endpush

@@ -1,98 +1,121 @@
 <x-app-layout>
-    <!-- Header -->
-    <header class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 mb-6">
-        <div>
-            <h2 class="text-3xl font-bold text-gray-900">Dashboard Dosen</h2>
-            <p class="text-gray-500 mt-1">Selamat datang, {{ auth()->user()->nama }} 👋</p>
-        </div>
-    </header>
-
-    <!-- Statistik -->
-    <div class="mb-8">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <i class="bi bi-bar-chart-fill text-blue-600"></i> Statistik Sistem
-        </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="p-6 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-2xl shadow-lg">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm">Total Mahasiswa</span>
-                    <i class="bi bi-people-fill text-2xl"></i>
+    <div class="bg-gray-50 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-gray-900">Dashboard Dosen</h1>
+                    <p class="text-sm text-gray-600">Pantau proposal, bimbingan, seminar, dan nilai pembimbing.</p>
                 </div>
-                <p class="text-4xl font-bold mt-2">{{ $totalMahasiswa ?? 0 }}</p>
+                <div class="flex items-center gap-3 bg-white border border-gray-100 rounded-full px-4 py-2 shadow-sm">
+                    <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 font-semibold flex items-center justify-center">
+                        {{ strtoupper(substr(auth()->user()->name ?? 'D',0,1)) }}
+                    </div>
+                    <div class="text-sm">
+                        <p class="font-semibold text-gray-900">{{ auth()->user()->name ?? auth()->user()->nama }}</p>
+                        <p class="text-gray-500 text-xs">{{ auth()->user()->email }}</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="p-6 bg-gradient-to-r from-green-400 to-emerald-500 text-white rounded-2xl shadow-lg">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm">KP Membimbing</span>
-                    <i class="bi bi-book text-2xl"></i>
+            <!-- Informasi & Tips -->
+            <div class="space-y-3 text-sm">
+                <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                    <span class="text-pink-500">📢</span> Informasi & Pengumuman
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
+                        <p class="font-semibold">👋 Halo, {{ auth()->user()->name ?? 'Dosen' }}!</p>
+                        <p>Validasi proposal, bimbingan, dan seminar tepat waktu agar progres mahasiswa berjalan lancar.</p>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-900">
+                        <p class="font-semibold flex items-center gap-2">
+                            <span class="text-lg">💡</span>Tips
+                        </p>
+                        <ul class="list-disc list-inside space-y-1 mt-1">
+                            <li>Prioritaskan proposal dan bimbingan yang masih pending.</li>
+                            <li>Isi nilai pembimbing setelah seminar selesai.</li>
+                            <li>Pantau jadwal seminar yang Anda uji.</li>
+                        </ul>
+                    </div>
                 </div>
-                <p class="text-4xl font-bold mt-2">{{ $kpMembimbingCount ?? 0 }}</p>
             </div>
 
-            <div class="p-6 bg-gradient-to-r from-yellow-400 to-amber-500 text-gray-900 rounded-2xl shadow-lg">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-medium">Menunggu Approval</span>
-                    <i class="bi bi-clock text-2xl"></i>
-                </div>
-                <p class="text-4xl font-bold mt-2">{{ $pendingApprovalsCount ?? 0 }}</p>
+            <!-- Statistik cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                @php
+                    $statCards = [
+                        ['label' => 'Proposal', 'desc' => 'Total proposal bimbingan', 'value' => $proposalCount ?? 0],
+                        ['label' => 'Bimbingan', 'desc' => 'Sesi bimbingan', 'value' => $bimbinganCount ?? 0],
+                        ['label' => 'Seminar', 'desc' => 'Seminar diampu/diuji', 'value' => $seminarCount ?? 0],
+                        ['label' => 'Nilai Pembimbing', 'desc' => 'Nilai yang diinput', 'value' => $nilaiCount ?? 0],
+                    ];
+                @endphp
+                @foreach($statCards as $card)
+                    <div class="rounded-3xl bg-[#1a246a] text-white p-4 shadow-sm text-center flex flex-col items-center justify-center">
+                        <p class="text-xs font-semibold uppercase tracking-widest">{{ $card['label'] }}</p>
+                        <p class="text-3xl font-bold mt-1">{{ $card['value'] }}</p>
+                        <p class="text-sm text-white/80 mt-1">{{ $card['desc'] }}</p>
+                    </div>
+                @endforeach
             </div>
 
-            <div class="p-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl shadow-lg">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm">KP Selesai</span>
-                    <i class="bi bi-check-circle-fill text-2xl"></i>
+            <!-- Ringkasan & Highlight -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                @php
+                    $chartItems = [
+                        ['label' => 'Proposal', 'val' => $proposalCount ?? 0, 'color' => '#3b82f6'],
+                        ['label' => 'Bimbingan', 'val' => $bimbinganCount ?? 0, 'color' => '#10b981'],
+                        ['label' => 'Seminar', 'val' => $seminarCount ?? 0, 'color' => '#f59e0b'],
+                        ['label' => 'Nilai Pembimbing', 'val' => $nilaiCount ?? 0, 'color' => '#6366f1'],
+                    ];
+                    $totalVal = max(array_sum(array_column($chartItems, 'val')), 1);
+                    $angles = [];
+                    $cursor = 0;
+                    foreach ($chartItems as $item) {
+                        $deg = ($item['val'] / $totalVal) * 360;
+                        $angles[] = [$cursor, $cursor + $deg, $item['color']];
+                        $cursor += $deg;
+                    }
+                    $gradientParts = collect($angles)->map(fn($a) => "{$a[2]} {$a[0]}deg {$a[1]}deg")->implode(', ');
+                @endphp
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">Ringkasan Progres</h3>
+                    </div>
+                    <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-center sm:gap-12">
+                        <div class="relative w-40 h-40">
+                            <div class="w-full h-full rounded-full" style="background: conic-gradient({{ $gradientParts }}), #e5e7eb;"></div>
+                            <div class="absolute inset-4 bg-white rounded-full flex items-center justify-center">
+                                <div class="text-center">
+                                    <p class="text-xs text-gray-500">Total</p>
+                                    <p class="text-xl font-semibold text-gray-900">{{ $totalVal }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-sm text-gray-700 w-full sm:w-72 text-center sm:text-left">
+                            @foreach($chartItems as $item)
+                                @php $pct = round(($item['val'] / $totalVal) * 100); @endphp
+                                <div class="flex items-center justify-between gap-6">
+                                    <div class="flex items-center gap-3 min-w-[140px]">
+                                        <span class="w-3 h-3 rounded-full" style="background: {{ $item['color'] }}"></span>
+                                        <span class="font-medium">{{ $item['label'] }}</span>
+                                    </div>
+                                    <span class="text-gray-900 font-semibold">{{ $item['val'] }} ({{ $pct }}%)</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
-                <p class="text-4xl font-bold mt-2">{{ $completedKpCount ?? 0 }}</p>
+                <div class="rounded-2xl border border-gray-100 bg-white p-6">
+                    <p class="text-base font-semibold text-gray-900 mb-3">Highlight</p>
+                    <ul class="list-disc list-inside text-sm text-gray-700 space-y-2">
+                        <li>Validasi proposal dan bimbingan yang masih pending.</li>
+                        <li>Jadwalkan atau cek seminar yang Anda uji.</li>
+                        <li>Masukkan nilai pembimbing setelah seminar selesai.</li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Manajemen -->
-    <div>
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <i class="bi bi-gear-fill text-indigo-600"></i> Manajemen
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <a href="{{ route('dosen.proposal.index') }}" class="group bg-white p-6 rounded-2xl shadow-md hover:shadow-lg border border-gray-100 transition transform hover:-translate-y-1">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition">
-                        <i class="bi bi-file-earmark-text text-xl"></i>
-                    </div>
-                    <h4 class="text-lg font-semibold text-gray-800">Validasi Proposal</h4>
-                </div>
-                <p class="text-gray-500 text-sm">Review & setujui proposal mahasiswa</p>
-            </a>
-
-            <a href="{{ route('dosen.bimbingan.index') }}" class="group bg-white p-6 rounded-2xl shadow-md hover:shadow-lg border border-gray-100 transition transform hover:-translate-y-1">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="p-3 bg-green-100 text-green-600 rounded-xl group-hover:bg-green-600 group-hover:text-white transition">
-                        <i class="bi bi-chat-dots text-xl"></i>
-                    </div>
-                    <h4 class="text-lg font-semibold text-gray-800">Riwayat Bimbingan</h4>
-                </div>
-                <p class="text-gray-500 text-sm">Catatan pertemuan bimbingan</p>
-            </a>
-
-            <a href="{{ route('dosen.nilai.index') }}" class="group bg-white p-6 rounded-2xl shadow-md hover:shadow-lg border border-gray-100 transition transform hover:-translate-y-1">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="p-3 bg-yellow-100 text-yellow-600 rounded-xl group-hover:bg-yellow-500 group-hover:text-white transition">
-                        <i class="bi bi-star-fill text-xl"></i>
-                    </div>
-                    <h4 class="text-lg font-semibold text-gray-800">Nilai Pembimbing</h4>
-                </div>
-                <p class="text-gray-500 text-sm">Input & perbarui nilai mahasiswa</p>
-            </a>
-
-            <a href="{{ route('dosen.seminar.index') }}" class="group bg-white p-6 rounded-2xl shadow-md hover:shadow-lg border border-gray-100 transition transform hover:-translate-y-1">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="p-3 bg-purple-100 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition">
-                        <i class="bi bi-mic-fill text-xl"></i>
-                    </div>
-                    <h4 class="text-lg font-semibold text-gray-800">Penguji Seminar</h4>
-                </div>
-                <p class="text-gray-500 text-sm">Penilaian seminar mahasiswa</p>
-            </a>
         </div>
     </div>
 </x-app-layout>

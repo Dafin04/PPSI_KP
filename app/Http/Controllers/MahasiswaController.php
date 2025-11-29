@@ -338,7 +338,11 @@ class MahasiswaController extends Controller
             abort(403, 'Akses ditolak.');
         }
 
-        return view('mahasiswa.bimbingan.edit', compact('bimbingan'));
+        $proposals = Proposal::where('mahasiswa_id', $mahasiswa->id)->get();
+        $existingDates = Bimbingan::where('mahasiswa_id', $mahasiswa->id)->pluck('tanggal_bimbingan')->toArray();
+        $minimumBimbingan = self::MIN_BIMBINGAN;
+
+        return view('mahasiswa.bimbingan.edit', compact('bimbingan', 'proposals', 'existingDates', 'minimumBimbingan'));
     }
 
     public function updateBimbingan(Request $request, Bimbingan $bimbingan)
@@ -350,12 +354,30 @@ class MahasiswaController extends Controller
         }
 
         $validated = $request->validate([
-            'tanggal_bimbingan' => 'required|date',
-            'catatan' => 'nullable|string',
-            'status' => 'required|in:menunggu,disetujui,ditolak',
+            'proposal_id' => 'required|exists:proposals,id',
+            'tanggal_bimbingan' => [
+                'required',
+                'date',
+                Rule::unique('bimbingans', 'tanggal_bimbingan')
+                    ->where(fn ($query) => $query->where('mahasiswa_id', $mahasiswa->id))
+                    ->ignore($bimbingan->id),
+            ],
+            'waktu_bimbingan' => 'required|date_format:H:i',
+            'topik_bimbingan' => 'required|string',
+            'catatan' => 'required|string',
+            'file_lampiran' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg|max:2048',
         ]);
 
-        $bimbingan->update($validated);
+        if ($request->hasFile('file_lampiran')) {
+            if ($bimbingan->file_lampiran) {
+                Storage::disk('public')->delete($bimbingan->file_lampiran);
+            }
+            $validated['file_lampiran'] = $request->file('file_lampiran')->store('lampiran_bimbingan', 'public');
+        }
+
+        $bimbingan->update($validated + [
+            'hasil_bimbingan' => $validated['catatan'] ?? $bimbingan->hasil_bimbingan,
+        ]);
 
         return redirect()->route('mahasiswa.bimbingan.index')->with('success', 'Bimbingan berhasil diperbarui.');
     }
