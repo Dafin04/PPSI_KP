@@ -46,7 +46,6 @@
                             <thead>
                                 <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
                                     <th class="px-5 py-3">Judul</th>
-                                    <th class="px-5 py-3">Status</th>
                                     @if($hasNote)
                                         <th class="px-5 py-3">Catatan Dosen</th>
                                     @endif
@@ -56,21 +55,27 @@
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($laporans as $l)
-                                    @php $status = $l->status ?? ($l->status_validasi ?? '-'); @endphp
+                                    @php
+                                        $status = $l->status ?? ($l->status_validasi ?? '-');
+                                        $judul = $l->judul ?: \App\Models\KerjaPraktek::where('mahasiswa_id', $l->mahasiswa_id)->latest()->value('judul_kp');
+                                    @endphp
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-5 py-4 text-gray-900 font-semibold">{{ $l->judul }}</td>
-                                        <td class="px-5 py-4 capitalize text-gray-700">{{ $status }}</td>
+                                        <td class="px-5 py-4 text-gray-900 font-semibold">{{ $judul ?? '-' }}</td>
                                         @if($hasNote)
                                             <td class="px-5 py-4 text-gray-600">{{ $l->catatan_validasi ?? '-' }}</td>
                                         @endif
                                         <td class="px-5 py-4 text-gray-700">{{ optional($l->tanggal_upload ?? $l->created_at)->format('d M Y') }}</td>
                                         <td class="px-5 py-4">
                                             <div class="flex items-center justify-center gap-2">
-                                                <a href="{{ route('mahasiswa.laporan.edit', $l) }}"
-                                                   class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-amber-200 text-amber-600 hover:bg-amber-50"
-                                                   title="Edit">
-                                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
-                                                </a>
+                                                @if($l->file_laporan)
+                                                    <a href="{{ asset('storage/'.$l->file_laporan) }}" target="_blank"
+                                                       class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50"
+                                                       title="Lihat lampiran">
+                                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5m7.5-7.5h-15" /></svg>
+                                                    </a>
+                                                @else
+                                                    <span class="text-xs text-gray-400">Tidak ada file</span>
+                                                @endif
                                                 <form action="{{ route('mahasiswa.laporan.destroy', $l) }}" method="POST" onsubmit="return confirm('Hapus laporan ini?')">
                                                     @csrf
                                                     @method('DELETE')
@@ -85,7 +90,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ $hasNote ? 5 : 4 }}" class="px-6 py-6 text-center text-gray-500">Belum ada laporan.</td>
+                                        <td colspan="{{ $hasNote ? 4 : 3 }}" class="px-6 py-6 text-center text-gray-500">Belum ada laporan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

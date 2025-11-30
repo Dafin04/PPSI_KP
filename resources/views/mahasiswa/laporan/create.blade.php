@@ -22,14 +22,7 @@
                         <x-input-error class="mt-2" :messages="$errors->get('file_laporan')" />
                     </div>
 
-                    <div>
-                        <label class="block text-sm text-gray-700 mb-1">Status</label>
-                        <select name="status" class="w-full border-gray-300 rounded-lg">
-                            <option value="diajukan">Diajukan</option>
-                            <option value="draft">Draft</option>
-                        </select>
-                        <x-input-error class="mt-2" :messages="$errors->get('status')" />
-                    </div>
+                    <input type="hidden" name="status" value="pending">
 
                     <div class="flex justify-end gap-3">
                         <a href="{{ route('mahasiswa.laporan.index') }}" class="text-gray-600">Batal</a>

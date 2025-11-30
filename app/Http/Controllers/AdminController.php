@@ -204,6 +204,15 @@ class AdminController extends Controller
             $nilaiSeminarDosen = optional($group->firstWhere('dosen_id','!=',null))->nilai_seminar;
             $nilaiLapangan = optional($group->firstWhere('pembimbing_lapangan_id','!=',null))->nilai_lapangan;
 
+            // Fallback ke nilai yang tersimpan di KerjaPraktek (jika ada)
+            $kp = $uid ? KerjaPraktek::where('mahasiswa_id', $uid)->latest()->first() : null;
+            if (is_null($nilaiPembimbing)) {
+                $nilaiPembimbing = optional($kp)->nilai_dosen_pembimbing;
+            }
+            if (is_null($nilaiLapangan)) {
+                $nilaiLapangan = optional($kp)->nilai_pengawas_lapangan;
+            }
+
             $seminarRecord = Seminar::where(function($q) use ($uid,$mid){
                 if ($uid) $q->where('mahasiswa_id',$uid);
                 if ($mid) $q->orWhere('mahasiswa_id',$mid);

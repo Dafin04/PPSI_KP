@@ -124,7 +124,8 @@ class MahasiswaController extends Controller
 
         $validated = $request->validate([
             'file_laporan' => 'required|file|mimes:pdf,doc,docx|max:2048',
-            'status' => 'required|in:draft,diajukan,disetujui,ditolak',
+            // status laporan mengikuti enum tabel: pending/disetujui/ditolak
+            'status' => 'nullable|in:pending,disetujui,ditolak',
         ]);
 
         $filePath = $request->file('file_laporan')->store('laporans', 'public');
@@ -132,9 +133,7 @@ class MahasiswaController extends Controller
         Laporan::create([
             'mahasiswa_id' => $mahasiswa->id,
             'file_laporan' => $filePath,
-            'status' => $validated['status'],
-            'status_verifikasi' => $validated['status'],
-            'tanggal_upload' => now(),
+            'status' => $validated['status'] ?? 'pending',
         ]);
 
         return redirect()->route('mahasiswa.laporan.index')->with('success', 'Laporan berhasil dibuat.');
@@ -149,7 +148,7 @@ class MahasiswaController extends Controller
     {
         $validated = $request->validate([
             'file_laporan' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'status' => 'required|in:draft,diajukan,disetujui,ditolak',
+            'status' => 'nullable|in:pending,disetujui,ditolak',
         ]);
 
         if ($request->hasFile('file_laporan')) {
@@ -160,7 +159,7 @@ class MahasiswaController extends Controller
         }
 
         $laporan->update([
-            'status' => $validated['status'],
+            'status' => $validated['status'] ?? $laporan->status,
         ]);
 
         return redirect()->route('mahasiswa.laporan.index')->with('success', 'Laporan berhasil diperbarui.');
@@ -181,8 +180,43 @@ class MahasiswaController extends Controller
     // ======================
     public function nilai()
     {
-        $mahasiswa = auth()->user()->mahasiswa;
-        $nilais = $mahasiswa ? $mahasiswa->nilais()->latest()->get() : collect();
+        $mhs = auth()->user()->mahasiswa;
+        if (!$mhs) {
+            return view('mahasiswa.nilai', ['nilais' => collect()]);
+        }
+
+        $userId = $mhs->user_id;
+
+        $kp = \App\Models\KerjaPraktek::where('mahasiswa_id', $userId)->latest()->first();
+
+        $nilaiPembimbing = \App\Models\Nilai::where('mahasiswa_id', $mhs->id)
+            ->whereNotNull('dosen_id')->latest()->first();
+        $nilaiLapangan = \App\Models\Nilai::where('mahasiswa_id', $mhs->id)
+            ->whereNotNull('pembimbing_lapangan_id')->latest()->first();
+        $nilaiSeminar = \App\Models\Seminar::where('mahasiswa_id', $userId)
+            ->whereNotNull('nilai_penguji_angka')
+            ->latest()->first();
+
+        $p = $nilaiPembimbing?->nilai_pembimbing ?? ($kp->nilai_dosen_pembimbing ?? null);
+        $l = $nilaiLapangan?->nilai_lapangan ?? ($kp->nilai_pengawas_lapangan ?? null);
+        $s = $nilaiSeminar?->nilai_penguji_angka ?? $nilaiPembimbing?->nilai_seminar;
+
+        $components = array_filter([$p, $l, $s], fn($v) => !is_null($v));
+        $total = count($components) ? round(array_sum($components) / count($components), 2) : null;
+
+        $record = (object) [
+            'pembimbing_nama' => optional($kp?->dosenPembimbing)->name
+                ?? optional($nilaiPembimbing?->dosen)->user->name
+                ?? '-',
+            'nilai_pembimbing' => $p,
+            'nilai_lapangan' => $l,
+            'nilai_seminar' => $s,
+            'total_nilai' => $total,
+            'nilai_huruf' => $nilaiPembimbing?->nilai_mutu ?? $nilaiLapangan?->nilai_mutu ?? ($total ? \App\Models\Nilai::konversiHuruf($total) : null),
+        ];
+
+        $nilais = collect([$record]);
+
         return view('mahasiswa.nilai', compact('nilais'));
     }
 

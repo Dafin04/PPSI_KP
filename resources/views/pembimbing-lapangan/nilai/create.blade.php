@@ -17,7 +17,7 @@
                                 <select name="mahasiswa_id" class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
                                     <option value="">-- Pilih Mahasiswa --</option>
                                     @foreach($mahasiswaList as $m)
-                                        <option value="{{ $m->user_id }}" @selected(old('mahasiswa_id') == $m->user_id)>
+                                        <option value="{{ $m->id }}" @selected(old('mahasiswa_id') == $m->id)>
                                             {{ $m->user->name ?? $m->nama }} ({{ $m->nim ?? '-' }})
                                         </option>
                                     @endforeach

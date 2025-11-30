@@ -13,7 +13,7 @@
                         <table class="min-w-full text-sm">
                             <thead>
                                 <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    <th class="px-5 py-3">Pembimbing Lapangan</th>
+                                    <th class="px-5 py-3">Dosen Pembimbing</th>
                                     <th class="px-5 py-3">Nilai Pembimbing</th>
                                     <th class="px-5 py-3">Nilai Lapangan</th>
                                     <th class="px-5 py-3">Nilai Seminar</th>
@@ -24,7 +24,9 @@
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($nilais as $nilai)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-5 py-4 text-gray-900 font-semibold">{{ $nilai->pembimbingLapangan->name ?? '-' }}</td>
+                                        <td class="px-5 py-4 text-gray-900 font-semibold">
+                                            {{ $nilai->pembimbing_nama ?? '-' }}
+                                        </td>
                                         <td class="px-5 py-4 text-gray-700">
                                             {{ $nilai->nilai_pembimbing }} ({{ $nilai->nilai_pembimbing_huruf ?? \App\Models\Nilai::konversiHuruf($nilai->nilai_pembimbing) }})
                                         </td>

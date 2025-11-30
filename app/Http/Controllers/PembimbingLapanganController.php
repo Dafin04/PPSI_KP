@@ -9,6 +9,7 @@ use App\Models\Instansi;
 use App\Models\Mahasiswa;
 use App\Services\SertifikatKpGenerator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class PembimbingLapanganController extends Controller
 {
@@ -56,22 +57,25 @@ class PembimbingLapanganController extends Controller
     public function storeNilai(Request $request)
     {
         $validated = $request->validate([
-            'mahasiswa_id' => 'required|exists:mahasiswas,user_id',
+            'mahasiswa_id' => 'required|exists:mahasiswas,id',
             'nilai_lapangan' => 'nullable|numeric|min:0|max:100',
         ]);
 
         // temukan profil mahasiswa dan KP terkait
-        $m = \App\Models\Mahasiswa::where('user_id', $validated['mahasiswa_id'])->first();
+        $m = \App\Models\Mahasiswa::find($validated['mahasiswa_id']);
         $kp = $m ? \App\Models\KerjaPraktek::where('mahasiswa_id', $m->user_id)->latest()->first() : null;
         // ambil profil dosen pembimbing (untuk memenuhi FK dosen_id)
         $dosenProfileId = null;
         if ($kp && $kp->dosen_pembimbing_id) {
             $dosenProfileId = \App\Models\Dosen::where('user_id', $kp->dosen_pembimbing_id)->value('id');
         }
+        if (!$dosenProfileId) {
+            return back()->withInput()->with('error', 'Dosen pembimbing belum ditetapkan untuk KP mahasiswa ini.');
+        }
 
         $nilai = Nilai::create([
-            'mahasiswa_id' => $m?->id ?? $validated['mahasiswa_id'],
-            'dosen_id' => $dosenProfileId, // boleh null jika tidak ada
+            'mahasiswa_id' => $m->id,
+            'dosen_id' => $dosenProfileId,
             'pembimbing_lapangan_id' => auth()->id(),
             'nilai_lapangan' => $validated['nilai_lapangan'],
         ]);
@@ -150,6 +154,8 @@ class PembimbingLapanganController extends Controller
             'etika' => 'required|in:tidak_baik,kurang_baik,cukup_baik,sangat_baik',
             'sinergi' => 'required|in:tidak,sedikit,sedang,besar',
             'lanjut' => 'required|in:ya,tidak',
+            // form field memakai kuota_tahun_depan, tetap dukung nama lama (jumlah_mahasiswa)
+            'kuota_tahun_depan' => 'nullable|integer|min:0',
             'jumlah_mahasiswa' => 'nullable|integer|min:0',
             'saran_matkul' => 'nullable|string',
             'saran_kemampuan' => 'nullable|string',
@@ -168,30 +174,48 @@ class PembimbingLapanganController extends Controller
             'etika' => $validated['etika'],
             'sinergi' => $validated['sinergi'],
             'lanjut' => $validated['lanjut'],
-            'jumlah_mahasiswa' => $validated['jumlah_mahasiswa'] ?? null,
+            'jumlah_mahasiswa' => $validated['kuota_tahun_depan'] ?? $validated['jumlah_mahasiswa'] ?? null,
             'saran_matkul' => $validated['saran_matkul'] ?? '',
             'saran_kemampuan' => $validated['saran_kemampuan'] ?? '',
         ];
 
         $kepuasan = in_array($validated['manfaat'], ['baik', 'sangat']) ? 'puas' : 'tidak_puas';
 
-        $mahasiswaId = Mahasiswa::where('user_id', auth()->id())->value('id')
-            ?? Mahasiswa::value('id'); // fallback ke mahasiswa pertama yang ada
+        // Hubungkan kuesioner ke profil mahasiswa (FK ke mahasiswas.id) dengan membuat entri dummy bila belum ada.
+        $user = auth()->user();
+        $mahasiswaProfile = Mahasiswa::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'nim' => 'PL-' . $user->id,
+                'prodi' => '',
+                'angkatan' => now()->year,
+                'ipk' => null,
+                'nama' => $user->name ?? '',
+            ]
+        );
+        $mahasiswaId = $mahasiswaProfile->id;
 
-        if (!$mahasiswaId) {
-            return back()->withErrors(['mahasiswa_id' => 'Data mahasiswa belum tersedia.'])->withInput();
-        }
-
-        $kuesioner = Kuesioner::create([
+        // siapkan data utama sesuai kolom yang ada agar tidak error jika migrasi opsional belum jalan
+        $data = [
             'pembimbing_lapangan_id' => auth()->id(),
             'mahasiswa_id' => $mahasiswaId,
             'isi_kuesioner' => json_encode($payload),
             'tipe' => 'instansi',
-            'kuota_tahun_depan' => $validated['jumlah_mahasiswa'] ?? null,
-            'saran_kegiatan' => $validated['saran_matkul'] ?? '',
-            'kebutuhan_skill' => $validated['saran_kemampuan'] ?? '',
-            'tingkat_kepuasan' => $kepuasan,
-        ]);
+        ];
+        if (Schema::hasColumn('kuesioners', 'kuota_tahun_depan')) {
+            $data['kuota_tahun_depan'] = $validated['kuota_tahun_depan'] ?? $validated['jumlah_mahasiswa'] ?? null;
+        }
+        if (Schema::hasColumn('kuesioners', 'saran_kegiatan')) {
+            $data['saran_kegiatan'] = $validated['saran_matkul'] ?? '';
+        }
+        if (Schema::hasColumn('kuesioners', 'kebutuhan_skill')) {
+            $data['kebutuhan_skill'] = $validated['saran_kemampuan'] ?? '';
+        }
+        if (Schema::hasColumn('kuesioners', 'tingkat_kepuasan')) {
+            $data['tingkat_kepuasan'] = $kepuasan;
+        }
+
+        $kuesioner = Kuesioner::create($data);
 
         $user = auth()->user();
         $pembimbing = \App\Models\PembimbingLapangan::with('instansi')->where('user_id', $user->id)->first();
@@ -205,10 +229,12 @@ class PembimbingLapanganController extends Controller
             'instansi' => $instansiName,
         ]);
 
-        $kuesioner->update([
-            'sertifikat_path' => $certificatePath,
-            'sertifikat_dibuat_pada' => now(),
-        ]);
+        if (Schema::hasColumn('kuesioners', 'sertifikat_path')) {
+            $kuesioner->update([
+                'sertifikat_path' => $certificatePath,
+                'sertifikat_dibuat_pada' => now(),
+            ]);
+        }
 
         return redirect()->route('lapangan.kuesioner.index')->with('success', 'Kuesioner tersimpan.');
     }

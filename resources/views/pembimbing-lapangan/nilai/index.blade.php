@@ -29,8 +29,8 @@
                                 @forelse($nilais as $n)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-5 py-4">
-                                            <div class="text-gray-900 font-semibold">{{ $n->mahasiswa->name ?? '-' }}</div>
-                                            <div class="text-xs text-gray-500">{{ $n->mahasiswa->nim ?? '' }}</div>
+                                            <div class="text-gray-900 font-semibold">{{ $n->mahasiswa?->user->name ?? $n->mahasiswa?->nama ?? '-' }}</div>
+                                            <div class="text-xs text-gray-500">{{ $n->mahasiswa?->nim ?? '' }}</div>
                                         </td>
                                         <td class="px-5 py-4 text-gray-900 font-semibold">{{ $n->nilai_lapangan }}</td>
                                         <td class="px-5 py-4 text-right">
