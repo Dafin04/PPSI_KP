@@ -40,14 +40,20 @@ class PembimbingLapanganController extends Controller
 
     public function createNilai()
     {
-        return view('pembimbing-lapangan.nilai.create');
+        $mahasiswaIds = \App\Models\KerjaPraktek::where('instansi_id', auth()->user()->instansi_id ?? null)
+            ->pluck('mahasiswa_id')
+            ->unique();
+        $mahasiswaList = \App\Models\Mahasiswa::with('user')
+            ->whereIn('user_id', $mahasiswaIds)
+            ->get();
+        return view('pembimbing-lapangan.nilai.create', compact('mahasiswaList'));
     }
 
     public function storeNilai(Request $request)
     {
         $validated = $request->validate([
             'mahasiswa_id' => 'required|integer',
-            'nilai_lapangan' => 'nullable|numeric|min:0|max:100',
+            'nilai_lapangan' => 'nullable|in:A,B,C,D',
         ]);
 
         $nilai = Nilai::create([
@@ -74,13 +80,19 @@ class PembimbingLapanganController extends Controller
 
     public function editNilai(Nilai $nilai)
     {
-        return view('pembimbing-lapangan.nilai.edit', compact('nilai'));
+        $mahasiswaIds = \App\Models\KerjaPraktek::where('instansi_id', auth()->user()->instansi_id ?? null)
+            ->pluck('mahasiswa_id')
+            ->unique();
+        $mahasiswaList = \App\Models\Mahasiswa::with('user')
+            ->whereIn('user_id', $mahasiswaIds)
+            ->get();
+        return view('pembimbing-lapangan.nilai.edit', compact('nilai','mahasiswaList'));
     }
 
     public function updateNilai(Request $request, Nilai $nilai)
     {
         $validated = $request->validate([
-            'nilai_lapangan' => 'nullable|numeric|min:0|max:100',
+            'nilai_lapangan' => 'nullable|in:A,B,C,D',
         ]);
 
         $nilai->update($validated);

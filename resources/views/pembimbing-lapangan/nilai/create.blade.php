@@ -13,14 +13,24 @@
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div class="space-y-2">
-                                <label class="text-sm font-semibold text-gray-800">Mahasiswa ID</label>
-                                <input name="mahasiswa_id" value="{{ old('mahasiswa_id') }}"
-                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required />
+                                <label class="text-sm font-semibold text-gray-800">Mahasiswa</label>
+                                <select name="mahasiswa_id" class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+                                    <option value="">-- Pilih Mahasiswa --</option>
+                                    @foreach($mahasiswaList as $m)
+                                        <option value="{{ $m->user_id }}" @selected(old('mahasiswa_id') == $m->user_id)>
+                                            {{ $m->user->name ?? $m->nama }} ({{ $m->nim ?? '-' }})
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="space-y-2">
                                 <label class="text-sm font-semibold text-gray-800">Nilai Lapangan</label>
-                                <input name="nilai_lapangan" type="number" step="0.01" value="{{ old('nilai_lapangan') }}"
-                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                <select name="nilai_lapangan" class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                    <option value="">-- Pilih Nilai --</option>
+                                    @foreach(['A','B','C','D'] as $huruf)
+                                        <option value="{{ $huruf }}" @selected(old('nilai_lapangan') == $huruf)>{{ $huruf }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
 

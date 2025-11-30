@@ -52,7 +52,11 @@
                                                 @checked(collect(old('pembimbing_lapangan_ids', []))->contains($pl->id))>
                                             <span>
                                                 <span class="font-medium text-gray-800">{{ $pl->user->name ?? 'PL #'.$pl->id }}</span>
-                                                <span class="text-gray-500 text-xs"> {{ $pl->instansi ? ' (Instansi: '.$pl->instansi.')' : '' }}</span>
+                                                <span class="text-gray-500 text-xs">
+                                                    @if($pl->instansi_id ?? false)
+                                                        (Instansi: {{ $pl->instansi->nama_instansi ?? $pl->instansi_id }})
+                                                    @endif
+                                                </span>
                                             </span>
                                         </label>
                                     @endforeach

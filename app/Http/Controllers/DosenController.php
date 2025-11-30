@@ -84,7 +84,8 @@ class DosenController extends Controller
                     'dosen_id' => $dosenId,
                     'judul' => $kp->judul_kp ?? 'Judul KP',
                     'file_proposal' => '',
-                    'status' => 'pending',
+                    // gunakan status yang valid di kolom enum
+                    'status' => 'diajukan',
                     'status_validasi' => 'pending',
                     'tanggal_upload' => now(),
                 ]);

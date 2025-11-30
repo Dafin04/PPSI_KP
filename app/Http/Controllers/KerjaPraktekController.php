@@ -81,6 +81,12 @@ class KerjaPraktekController extends Controller
             abort(403, 'Hanya mahasiswa yang dapat mendaftar KP');
         }
 
+        // Isi otomatis pilihan_1 dari instansi terpilih jika belum ada
+        if (!$request->filled('pilihan_1') && $request->filled('instansi_id')) {
+            $instansiNama = Instansi::where('id', $request->instansi_id)->value('nama_instansi');
+            $request->merge(['pilihan_1' => $instansiNama]);
+        }
+
         $request->validate([
             'judul_kp' => 'required|string|max:255',
             'deskripsi_kp' => 'required|string',
@@ -92,10 +98,10 @@ class KerjaPraktekController extends Controller
             'pilihan_3' => 'nullable|string|max:255',
             'dosen_pembimbing_id' => 'required|exists:users,id',
             'proposal_file' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'bukti_ipk_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'bukti_ipk_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'prestasi_akademik' => 'nullable|string',
             'prestasi_non_akademik' => 'nullable|string',
-            'pengalaman_si' => 'required|string'
+            'pengalaman_si' => 'nullable|string'
         ]);
 
         DB::beginTransaction();
@@ -191,6 +197,12 @@ class KerjaPraktekController extends Controller
             abort(403, 'Tidak dapat mengupdate pendaftaran ini');
         }
 
+        // Isi otomatis pilihan_1 dari instansi terpilih jika belum ada
+        if (!$request->filled('pilihan_1') && $request->filled('instansi_id')) {
+            $instansiNama = Instansi::where('id', $request->instansi_id)->value('nama_instansi');
+            $request->merge(['pilihan_1' => $instansiNama]);
+        }
+
         $request->validate([
             'judul_kp' => 'required|string|max:255',
             'deskripsi_kp' => 'required|string',
@@ -202,10 +214,10 @@ class KerjaPraktekController extends Controller
             'pilihan_3' => 'nullable|string|max:255',
             'dosen_pembimbing_id' => 'required|exists:users,id',
             'proposal_file' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'bukti_ipk_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'bukti_ipk_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'prestasi_akademik' => 'nullable|string',
             'prestasi_non_akademik' => 'nullable|string',
-            'pengalaman_si' => 'required|string'
+            'pengalaman_si' => 'nullable|string'
         ]);
 
         DB::beginTransaction();

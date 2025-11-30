@@ -30,19 +30,20 @@
                                 <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
                                     <th class="px-6 py-3">Instansi</th>
                                     <th class="px-6 py-3">Lokasi</th>
-                                    <th class="px-6 py-3">Kuota Terbaru</th>
                                     <th class="px-6 py-3">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($instansis as $instansi)
-                                    @php $kuotaTerbaru = optional($instansi->kuotas->sortByDesc('tahun')->first()); @endphp
+                                    @php
+                                        $lokasi = $instansi->kota ?? $instansi->provinsi ?? $instansi->alamat ?? '-';
+                                        if($instansi->kota && $instansi->provinsi){
+                                            $lokasi = $instansi->kota . ', ' . $instansi->provinsi;
+                                        }
+                                    @endphp
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 text-gray-900 font-medium">{{ $instansi->nama_instansi }}</td>
-                                        <td class="px-6 py-4 text-gray-600">{{ $instansi->kota ?? '-' }} {{ $instansi->provinsi ? ' - '.$instansi->provinsi : '' }}</td>
-                                        <td class="px-6 py-4 text-gray-600">
-                                            {{ $kuotaTerbaru ? $kuotaTerbaru->jumlah . ' mahasiswa (' . $kuotaTerbaru->tahun . ')' : '-' }}
-                                        </td>
+                                        <td class="px-6 py-4 text-gray-600">{{ $lokasi }}</td>
                                         <td class="px-6 py-4">
                                             @if(($instansi->status ?? false))
                                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Terbuka</span>
@@ -53,7 +54,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-6 py-6 text-center text-gray-500">Belum ada instansi kerja sama terdaftar.</td>
+                                        <td colspan="3" class="px-6 py-6 text-center text-gray-500">Belum ada instansi kerja sama terdaftar.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

@@ -301,6 +301,7 @@ class AdminController extends Controller
 
     public function createInstansi()
     {
+        $this->ensurePembimbingLapanganRecords();
         $pembimbingLapangans = PembimbingLapangan::with('user')->orderBy('id')->get();
         return view('admin.instansi.create', compact('pembimbingLapangans'));
     }
@@ -334,10 +335,21 @@ class AdminController extends Controller
 
     public function editInstansi(Instansi $instansi)
     {
+        $this->ensurePembimbingLapanganRecords();
         $pembimbingLapangans = PembimbingLapangan::with('user')->orderBy('id')->get();
         $selectedPembimbingIds = $instansi->pembimbingLapangans()->pluck('id')->toArray();
 
         return view('admin.instansi.edit', compact('instansi', 'pembimbingLapangans', 'selectedPembimbingIds'));
+    }
+
+    private function ensurePembimbingLapanganRecords(): void
+    {
+        $plUsers = User::whereHas('roles', fn($q) => $q->where('slug', 'pembimbing_lapangan'))->pluck('id')->toArray();
+        $existing = PembimbingLapangan::whereIn('user_id', $plUsers)->pluck('user_id')->toArray();
+        $missing = array_diff($plUsers, $existing);
+        foreach ($missing as $userId) {
+            PembimbingLapangan::create(['user_id' => $userId]);
+        }
     }
 
     public function updateInstansi(Request $request, Instansi $instansi)

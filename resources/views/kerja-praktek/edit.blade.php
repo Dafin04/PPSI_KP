@@ -1,125 +1,164 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Edit Pendaftaran Kerja Praktek') }}
-        </h2>
-    </x-slot>
+    <div class="max-w-5xl mx-auto py-10 px-4 lg:px-0">
+        <div class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-100 flex flex-col gap-1">
+                <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest">Pendaftaran KP</p>
+                <h1 class="text-xl font-semibold text-gray-900">Edit Pendaftaran Kerja Praktek</h1>
+                <p class="text-sm text-gray-500">Sesuaikan data KP, pilihan instansi, dan dokumen pendukung.</p>
+            </div>
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <form action="{{ route('kerja-praktek.update', $kerjaPraktek) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        @method('PUT')
+            <div class="px-6 py-5 space-y-6">
+                @if ($errors->any())
+                    <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {{ __('Periksa kembali isian Anda. Pastikan semua kolom wajib terisi dengan benar.') }}
+                        <ul class="mt-2 list-disc list-inside text-xs text-red-600 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-                        <div class="mb-4">
-                            <x-input-label for="judul_kp" value="Judul Kerja Praktek" />
-                            <x-text-input id="judul_kp" name="judul_kp" type="text" class="mt-1 block w-full"
-                                        value="{{ old('judul_kp', $kerjaPraktek->judul_kp) }}" required />
-                            <x-input-error :messages="$errors->get('judul_kp')" class="mt-2" />
+                <form action="{{ route('kerja-praktek.update', $kerjaPraktek) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="grid grid-cols-1 gap-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="space-y-2">
+                                <label for="judul_kp" class="text-sm font-semibold text-gray-800">Judul Kerja Praktek</label>
+                                <input id="judul_kp" name="judul_kp" type="text" value="{{ old('judul_kp', $kerjaPraktek->judul_kp) }}"
+                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                       required>
+                                <x-input-error :messages="$errors->get('judul_kp')" class="mt-1" />
+                            </div>
+                            <div class="space-y-2">
+                                <label for="durasi_minggu" class="text-sm font-semibold text-gray-800">Durasi (minggu)</label>
+                                <input id="durasi_minggu" name="durasi_minggu" type="number" min="4" max="16" value="{{ old('durasi_minggu', $kerjaPraktek->durasi_minggu) }}"
+                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                       required>
+                                <x-input-error :messages="$errors->get('durasi_minggu')" class="mt-1" />
+                            </div>
                         </div>
 
-                        <div class="mb-4">
-                            <x-input-label for="deskripsi_kp" value="Deskripsi Kerja Praktek" />
+                        <div class="space-y-2">
+                            <label for="deskripsi_kp" class="text-sm font-semibold text-gray-800">Deskripsi Kerja Praktek</label>
                             <textarea id="deskripsi_kp" name="deskripsi_kp" rows="4"
-                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                    required>{{ old('deskripsi_kp', $kerjaPraktek->deskripsi_kp) }}</textarea>
-                            <x-input-error :messages="$errors->get('deskripsi_kp')" class="mt-2" />
+                                      class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                      required>{{ old('deskripsi_kp', $kerjaPraktek->deskripsi_kp) }}</textarea>
+                            <x-input-error :messages="$errors->get('deskripsi_kp')" class="mt-1" />
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <x-input-label for="tanggal_mulai" value="Tanggal Mulai" />
-                                <x-text-input id="tanggal_mulai" name="tanggal_mulai" type="date" class="mt-1 block w-full"
-                                            value="{{ old('tanggal_mulai', $kerjaPraktek->tanggal_mulai->format('Y-m-d')) }}" required />
-                                <x-input-error :messages="$errors->get('tanggal_mulai')" class="mt-2" />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="space-y-2">
+                                <label for="tanggal_mulai" class="text-sm font-semibold text-gray-800">Tanggal Mulai</label>
+                                <input id="tanggal_mulai" name="tanggal_mulai" type="date" value="{{ old('tanggal_mulai', optional($kerjaPraktek->tanggal_mulai)->format('Y-m-d')) }}"
+                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                       required>
+                                <x-input-error :messages="$errors->get('tanggal_mulai')" class="mt-1" />
                             </div>
-
-                            <div>
-                                <x-input-label for="tanggal_selesai" value="Tanggal Selesai" />
-                                <x-text-input id="tanggal_selesai" name="tanggal_selesai" type="date" class="mt-1 block w-full"
-                                            value="{{ old('tanggal_selesai', $kerjaPraktek->tanggal_selesai->format('Y-m-d')) }}" required />
-                                <x-input-error :messages="$errors->get('tanggal_selesai')" class="mt-2" />
+                            <div class="space-y-2">
+                                <label for="tanggal_selesai" class="text-sm font-semibold text-gray-800">Tanggal Selesai</label>
+                                <input id="tanggal_selesai" name="tanggal_selesai" type="date" value="{{ old('tanggal_selesai', optional($kerjaPraktek->tanggal_selesai)->format('Y-m-d')) }}"
+                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                       required>
+                                <x-input-error :messages="$errors->get('tanggal_selesai')" class="mt-1" />
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <x-input-label for="durasi_minggu" value="Durasi (minggu)" />
-                            <x-text-input id="durasi_minggu" name="durasi_minggu" type="number" class="mt-1 block w-full"
-                                        value="{{ old('durasi_minggu', $kerjaPraktek->durasi_minggu) }}" min="4" max="16" required />
-                            <x-input-error :messages="$errors->get('durasi_minggu')" class="mt-2" />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="space-y-2">
+                                <label for="instansi_id" class="text-sm font-semibold text-gray-800">Instansi (Pilihan KP 1)</label>
+                                <select id="instansi_id" name="instansi_id"
+                                        class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        required>
+                                    <option value="">Pilih Instansi</option>
+                                    @foreach($instansis as $instansi)
+                                        <option value="{{ $instansi->id }}" {{ old('instansi_id', $kerjaPraktek->instansi_id) == $instansi->id ? 'selected' : '' }}>
+                                            {{ $instansi->nama_instansi }} - {{ $instansi->kota }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('instansi_id')" class="mt-1" />
+                            </div>
+                            <div class="space-y-2">
+                                <label for="dosen_pembimbing_id" class="text-sm font-semibold text-gray-800">Dosen Pembimbing</label>
+                                <select id="dosen_pembimbing_id" name="dosen_pembimbing_id"
+                                        class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        required>
+                                    <option value="">Pilih Dosen Pembimbing</option>
+                                    @foreach($dosens as $dosen)
+                                        <option value="{{ $dosen->id }}" {{ old('dosen_pembimbing_id', $kerjaPraktek->dosen_pembimbing_id) == $dosen->id ? 'selected' : '' }}>
+                                            {{ $dosen->name }} - {{ $dosen->nip }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('dosen_pembimbing_id')" class="mt-1" />
+                            </div>
                         </div>
 
-                        <div class="mb-4">
-                            <x-input-label for="instansi_id" value="Instansi" />
-                            <select id="instansi_id" name="instansi_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                <option value="">Pilih Instansi</option>
-                                @foreach($instansis as $instansi)
-                                    <option value="{{ $instansi->id }}" {{ (old('instansi_id', $kerjaPraktek->instansi_id) == $instansi->id) ? 'selected' : '' }}>
-                                        {{ $instansi->nama_instansi }} - {{ $instansi->kota }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('instansi_id')" class="mt-2" />
+                        <input type="hidden" id="pilihan_1" name="pilihan_1" value="{{ old('pilihan_1', $kerjaPraktek->pilihan_1) }}">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="space-y-2">
+                                <label for="pilihan_2" class="text-sm font-semibold text-gray-800">Pilihan Tempat KP 2 (Opsional)</label>
+                                <select id="pilihan_2" name="pilihan_2"
+                                        class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                    <option value="">Pilih Instansi</option>
+                                    @foreach($instansis as $instansi)
+                                        <option value="{{ $instansi->nama_instansi }}" {{ old('pilihan_2', $kerjaPraktek->pilihan_2) == $instansi->nama_instansi ? 'selected' : '' }}>
+                                            {{ $instansi->nama_instansi }} - {{ $instansi->kota }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('pilihan_2')" class="mt-1" />
+                            </div>
                         </div>
 
-                        <div class="mb-4">
-                            <x-input-label for="dosen_pembimbing_id" value="Dosen Pembimbing" />
-                            <select id="dosen_pembimbing_id" name="dosen_pembimbing_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                <option value="">Pilih Dosen Pembimbing</option>
-                                @foreach($dosens as $dosen)
-                                    <option value="{{ $dosen->id }}" {{ (old('dosen_pembimbing_id', $kerjaPraktek->dosen_pembimbing_id) == $dosen->id) ? 'selected' : '' }}>
-                                        {{ $dosen->name }} - {{ $dosen->nip }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('dosen_pembimbing_id')" class="mt-2" />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="space-y-2">
+                                <label for="proposal_file" class="text-sm font-semibold text-gray-800">Unggah Proposal (PDF/DOC) - Opsional</label>
+                                <input id="proposal_file" name="proposal_file" type="file"
+                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                       accept=".pdf,.doc,.docx">
+                                <p class="text-xs text-gray-500">Maksimal 2MB. Jika tidak diunggah, file lama tetap dipakai.</p>
+                                <x-input-error :messages="$errors->get('proposal_file')" class="mt-1" />
+                            </div>
                         </div>
 
-                        <div class="mb-4">
-                            <x-input-label for="pilihan_1" value="Pilihan Tempat KP 1" />
-                            <x-text-input id="pilihan_1" name="pilihan_1" type="text" class="mt-1 block w-full"
-                                        value="{{ old('pilihan_1', $kerjaPraktek->pilihan_1) }}" placeholder="Nama perusahaan/divisi yang diinginkan" required />
-                            <x-input-error :messages="$errors->get('pilihan_1')" class="mt-2" />
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-4 border-t border-gray-100">
+                            <p class="text-sm text-gray-500">Setelah disetujui admin, data akan terkunci.</p>
+                            <div class="flex items-center gap-3">
+                                <a href="{{ route('kerja-praktek.show', $kerjaPraktek) }}"
+                                   class="inline-flex items-center px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50">
+                                    Kembali
+                                </a>
+                                <button type="submit"
+                                        class="inline-flex items-center px-5 py-2.5 rounded-xl bg-[#1a246a] text-white font-semibold shadow hover:bg-[#11194d]">
+                                    Update Pendaftaran
+                                </button>
+                            </div>
                         </div>
-
-                        <div class="mb-4">
-                            <x-input-label for="pilihan_2" value="Pilihan Tempat KP 2 (Opsional)" />
-                            <x-text-input id="pilihan_2" name="pilihan_2" type="text" class="mt-1 block w-full"
-                                        value="{{ old('pilihan_2', $kerjaPraktek->pilihan_2) }}" placeholder="Pilihan kedua" />
-                            <x-input-error :messages="$errors->get('pilihan_2')" class="mt-2" />
-                        </div>
-
-                        <div class="mb-4">
-                            <x-input-label for="pilihan_3" value="Pilihan Tempat KP 3 (Opsional)" />
-                            <x-text-input id="pilihan_3" name="pilihan_3" type="text" class="mt-1 block w-full"
-                                        value="{{ old('pilihan_3', $kerjaPraktek->pilihan_3) }}" placeholder="Pilihan ketiga" />
-                            <x-input-error :messages="$errors->get('pilihan_3')" class="mt-2" />
-                        </div>
-
-                        <div class="mb-4">
-                            <x-input-label for="proposal_file" value="File Proposal Baru (PDF/DOC/DOCX, Max 2MB) - Opsional" />
-                            <input id="proposal_file" name="proposal_file" type="file"
-                                   class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                   accept=".pdf,.doc,.docx" />
-                            <x-input-error :messages="$errors->get('proposal_file')" class="mt-2" />
-                            @if($kerjaPraktek->proposal_file)
-                                <p class="text-sm text-gray-600 mt-1">File proposal saat ini akan diganti jika file baru diupload</p>
-                            @endif
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <a href="{{ route('kerja-praktek.show', $kerjaPraktek) }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                                Kembali
-                            </a>
-                            <x-primary-button>
-                                Update Pendaftaran
-                            </x-primary-button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </x-app-layout>
+
+@push('scripts')
+<script>
+    const instansiSelect = document.getElementById('instansi_id');
+    const pilihan1Input = document.getElementById('pilihan_1');
+
+    function syncPilihan1() {
+        const selected = instansiSelect.options[instansiSelect.selectedIndex];
+        pilihan1Input.value = selected ? selected.text : '';
+    }
+
+    if (instansiSelect && pilihan1Input) {
+        instansiSelect.addEventListener('change', syncPilihan1);
+        syncPilihan1();
+    }
+</script>
+@endpush
