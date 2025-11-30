@@ -52,8 +52,8 @@ class PembimbingLapanganController extends Controller
     public function storeNilai(Request $request)
     {
         $validated = $request->validate([
-            'mahasiswa_id' => 'required|integer',
-            'nilai_lapangan' => 'nullable|in:A,B,C,D',
+            'mahasiswa_id' => 'required|exists:mahasiswas,user_id',
+            'nilai_lapangan' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $nilai = Nilai::create([
@@ -92,7 +92,7 @@ class PembimbingLapanganController extends Controller
     public function updateNilai(Request $request, Nilai $nilai)
     {
         $validated = $request->validate([
-            'nilai_lapangan' => 'nullable|in:A,B,C,D',
+            'nilai_lapangan' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $nilai->update($validated);

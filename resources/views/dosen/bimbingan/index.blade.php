@@ -36,7 +36,7 @@
                                             <div class="text-xs text-gray-500">{{ $b->waktu_bimbingan ? \Carbon\Carbon::createFromFormat('H:i:s', $b->waktu_bimbingan)->format('H:i') : '-' }}</div>
                                         </td>
                                         <td class="px-5 py-4">
-                                            <div class="text-gray-900 font-semibold">{{ $b->mahasiswa->name ?? '-' }}</div>
+                                            <div class="text-gray-900 font-semibold">{{ $b->mahasiswa->user->name ?? '-' }}</div>
                                             <div class="text-xs text-gray-500">{{ $b->mahasiswa->nim ?? '' }}</div>
                                         </td>
                                         <td class="px-5 py-4">

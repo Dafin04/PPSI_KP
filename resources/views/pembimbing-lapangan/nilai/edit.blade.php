@@ -24,13 +24,9 @@
                                 </select>
                             </div>
                             <div class="space-y-2">
-                                <label class="text-sm font-semibold text-gray-800">Nilai Lapangan</label>
-                                <select name="nilai_lapangan" class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                                    <option value="">-- Pilih Nilai --</option>
-                                    @foreach(['A','B','C','D'] as $huruf)
-                                        <option value="{{ $huruf }}" @selected(old('nilai_lapangan', $nilai->nilai_lapangan) == $huruf)>{{ $huruf }}</option>
-                                    @endforeach
-                                </select>
+                                <label class="text-sm font-semibold text-gray-800">Nilai Lapangan (0-100)</label>
+                                <input name="nilai_lapangan" type="number" step="0.01" value="{{ old('nilai_lapangan', $nilai->nilai_lapangan) }}"
+                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
                             </div>
                         </div>
 

@@ -184,6 +184,31 @@ class AdminController extends Controller
         ));
     }
 
+    /**
+     * Rekap nilai dosen & lapangan, admin isi huruf akhir.
+     */
+    public function nilaiIndex()
+    {
+        $records = \App\Models\Nilai::with(['mahasiswa.user'])->orderByDesc('created_at')->get();
+        return view('admin.nilai.index', compact('records'));
+    }
+
+    /**
+     * Admin menyimpan huruf akhir.
+     */
+    public function nilaiUpdate(Request $request, \App\Models\Nilai $nilai)
+    {
+        $validated = $request->validate([
+            'nilai_mutu' => 'nullable|in:A,B,C,D',
+        ]);
+
+        $nilai->update([
+            'nilai_mutu' => $validated['nilai_mutu'] ?? null,
+        ]);
+
+        return back()->with('success', 'Nilai akhir disimpan.');
+    }
+
     // CRUD User
     public function indexUsers(Request $request)
     {

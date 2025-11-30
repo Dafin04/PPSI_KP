@@ -67,6 +67,16 @@
                     </a>
                 </li>
 
+                <!-- Nilai Data KP -->
+                <li>
+                    <a href="{{ route('admin.nilai.index') }}"
+                       class="flex items-center gap-3 rounded-lg px-3 py-2 transition-all 
+                       {{ request()->routeIs('admin.nilai.*') ? 'bg-blue-500 text-white shadow-sm' : 'hover:bg-blue-600/70 text-white/90' }}">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>Nilai Data KP</span>
+                    </a>
+                </li>
+
                 <!-- Logout -->
                 <li class="pt-3 border-t border-blue-500 mt-3">
                     <form method="POST" action="{{ route('logout') }}">

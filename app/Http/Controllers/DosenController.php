@@ -190,36 +190,26 @@ class DosenController extends Controller
 
     public function createNilai()
     {
-        return view('dosen.nilai.create');
+        $mahasiswaList = Mahasiswa::with('user')->orderBy('user_id')->get();
+        return view('dosen.nilai.create', compact('mahasiswaList'));
     }
 
     public function storeNilai(Request $request)
     {
         $validated = $request->validate([
             'mahasiswa_id' => 'required|exists:mahasiswas,id',
-            'pembimbing_lapangan_id' => 'required|exists:users,id',
             'nilai_pembimbing' => 'nullable|numeric|min:0|max:100',
-            'nilai_lapangan' => 'nullable|numeric|min:0|max:100',
             'nilai_seminar' => 'nullable|numeric|min:0|max:100',
-            'total_nilai' => 'nullable|numeric|min:0|max:100',
-            'nilai_pembimbing_huruf' => 'nullable|in:A,B,C,D',
-            'nilai_lapangan_huruf' => 'nullable|in:A,B,C,D',
-            'nilai_seminar_huruf' => 'nullable|in:A,B,C,D',
-            'nilai_mutu' => 'nullable|in:A,B,C,D',
         ]);
 
         $nilai = Nilai::create([
             'mahasiswa_id' => $validated['mahasiswa_id'],
             'dosen_id' => auth()->id(),
-            'pembimbing_lapangan_id' => $validated['pembimbing_lapangan_id'],
             'nilai_pembimbing' => $validated['nilai_pembimbing'],
-            'nilai_lapangan' => $validated['nilai_lapangan'],
             'nilai_seminar' => $validated['nilai_seminar'],
-            'total_nilai' => $validated['total_nilai'],
-            'nilai_pembimbing_huruf' => $validated['nilai_pembimbing_huruf'] ?? Nilai::konversiHuruf($validated['nilai_pembimbing'] ?? null),
-            'nilai_lapangan_huruf' => $validated['nilai_lapangan_huruf'] ?? Nilai::konversiHuruf($validated['nilai_lapangan'] ?? null),
-            'nilai_seminar_huruf' => $validated['nilai_seminar_huruf'] ?? Nilai::konversiHuruf($validated['nilai_seminar'] ?? null),
-            'nilai_mutu' => $validated['nilai_mutu'] ?? Nilai::konversiHuruf($validated['total_nilai'] ?? null),
+            'nilai_pembimbing_huruf' => null,
+            'nilai_seminar_huruf' => null,
+            'nilai_mutu' => null,
         ]);
 
         // Sinkronkan komponen nilai ke entitas KP agar nilai akhir terhitung
@@ -230,9 +220,6 @@ class DosenController extends Controller
             if ($kp) {
                 if (!is_null($validated['nilai_pembimbing'] ?? null)) {
                     $kp->nilai_dosen_pembimbing = $validated['nilai_pembimbing'];
-                }
-                if (!is_null($validated['nilai_lapangan'] ?? null)) {
-                    $kp->nilai_pengawas_lapangan = $validated['nilai_lapangan'];
                 }
                 $kp->save();
                 $kp->hitungNilaiAkhir();
@@ -251,29 +238,16 @@ class DosenController extends Controller
     {
         $validated = $request->validate([
             'nilai_pembimbing' => 'nullable|numeric|min:0|max:100',
-            'nilai_lapangan' => 'nullable|numeric|min:0|max:100',
             'nilai_seminar' => 'nullable|numeric|min:0|max:100',
-            'total_nilai' => 'nullable|numeric|min:0|max:100',
-            'nilai_pembimbing_huruf' => 'nullable|in:A,B,C,D',
-            'nilai_lapangan_huruf' => 'nullable|in:A,B,C,D',
-            'nilai_seminar_huruf' => 'nullable|in:A,B,C,D',
-            'nilai_mutu' => 'nullable|in:A,B,C,D',
         ]);
 
-        $nilai->update($validated);
+        $nilai->update([
+            'nilai_pembimbing' => $validated['nilai_pembimbing'],
+            'nilai_seminar' => $validated['nilai_seminar'],
+            'nilai_pembimbing_huruf' => null,
+            'nilai_seminar_huruf' => null,
+        ]);
 
-        if (empty($validated['nilai_pembimbing_huruf'] ?? null) && array_key_exists('nilai_pembimbing', $validated)) {
-            $nilai->nilai_pembimbing_huruf = Nilai::konversiHuruf($validated['nilai_pembimbing']);
-        }
-        if (empty($validated['nilai_lapangan_huruf'] ?? null) && array_key_exists('nilai_lapangan', $validated)) {
-            $nilai->nilai_lapangan_huruf = Nilai::konversiHuruf($validated['nilai_lapangan']);
-        }
-        if (empty($validated['nilai_seminar_huruf'] ?? null) && array_key_exists('nilai_seminar', $validated)) {
-            $nilai->nilai_seminar_huruf = Nilai::konversiHuruf($validated['nilai_seminar']);
-        }
-        if (empty($validated['nilai_mutu'] ?? null) && array_key_exists('total_nilai', $validated)) {
-            $nilai->nilai_mutu = Nilai::konversiHuruf($validated['total_nilai']);
-        }
         $nilai->save();
 
         // Sinkronkan ke KP
@@ -284,9 +258,6 @@ class DosenController extends Controller
             if ($kp) {
                 if (!is_null($validated['nilai_pembimbing'] ?? null)) {
                     $kp->nilai_dosen_pembimbing = $validated['nilai_pembimbing'];
-                }
-                if (!is_null($validated['nilai_lapangan'] ?? null)) {
-                    $kp->nilai_pengawas_lapangan = $validated['nilai_lapangan'];
                 }
                 $kp->save();
                 $kp->hitungNilaiAkhir();

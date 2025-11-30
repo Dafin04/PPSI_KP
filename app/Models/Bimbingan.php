@@ -36,10 +36,9 @@ class Bimbingan extends Model
         'tanggal_bimbingan' => 'date',
     ];
 
-    // Relasi ke User agar kompatibel dengan tampilan yang mengakses ->name
     public function mahasiswa()
     {
-        return $this->belongsTo(User::class, 'mahasiswa_id');
+        return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id');
     }
 
     public function dosen()
@@ -47,5 +46,10 @@ class Bimbingan extends Model
         // Skema lama: dosen_id, skema baru: dosen_pembimbing_id
         $fk = Schema::hasColumn($this->getTable(), 'dosen_id') ? 'dosen_id' : 'dosen_pembimbing_id';
         return $this->belongsTo(User::class, $fk);
+    }
+
+    public function dosenPembimbingUser()
+    {
+        return $this->belongsTo(User::class, 'dosen_pembimbing_id');
     }
 }

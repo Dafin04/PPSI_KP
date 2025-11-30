@@ -100,6 +100,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/periode/{periodeKp}', [PeriodeKpController::class, 'update'])->name('periode.update');
     Route::delete('/periode/{periodeKp}', [PeriodeKpController::class, 'destroy'])->name('periode.destroy');
     Route::post('/periode/{periodeKp}/aktif', [PeriodeKpController::class, 'setAktif'])->name('periode.aktif');
+
+    // Rekap Nilai KP (admin)
+    Route::get('/nilai', [AdminController::class, 'nilaiIndex'])->name('nilai.index');
+    Route::put('/nilai/{nilai}', [AdminController::class, 'nilaiUpdate'])->name('nilai.update');
 });
 
 // Mahasiswa routes

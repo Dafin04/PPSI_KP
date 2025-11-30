@@ -80,7 +80,7 @@
                                                     <span class="text-gray-400">-</span>
                                                 @endif
                                             </td>
-                                            <td class="px-5 py-4 text-gray-900">{{ $bimbingan->dosen->nama ?? '-' }}</td>
+                                            <td class="px-5 py-4 text-gray-900">{{ $bimbingan->dosenPembimbingUser->name ?? $bimbingan->dosen->name ?? '-' }}</td>
                                             <td class="px-5 py-4">
                                                 <div class="flex items-center justify-center gap-2">
                                                     <a href="{{ route('mahasiswa.bimbingan.edit', $bimbingan->id) }}"
