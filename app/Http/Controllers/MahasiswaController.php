@@ -31,7 +31,7 @@ class MahasiswaController extends Controller
             return 0;
         }
 
-        return Bimbingan::where('mahasiswa_id', $mahasiswa->id)
+        return Bimbingan::where('mahasiswa_id', $mahasiswa->user_id)
             ->where('status', 'disetujui')
             ->count();
     }
@@ -231,7 +231,9 @@ class MahasiswaController extends Controller
     public function indexBimbingan()
     {
         $mahasiswa = auth()->user()->mahasiswa;
-        $bimbingans = $mahasiswa ? $mahasiswa->bimbingans()->latest()->get() : collect();
+        $bimbingans = $mahasiswa
+            ? Bimbingan::where('mahasiswa_id', auth()->id())->latest()->get()
+            : collect();
         $dosens = Dosen::all();
         $approvedBimbinganCount = $this->approvedBimbinganCount($mahasiswa);
 
@@ -248,7 +250,7 @@ class MahasiswaController extends Controller
         }
 
         $proposals = Proposal::where('mahasiswa_id', $mahasiswa->id)->get();
-        $existingDates = Bimbingan::where('mahasiswa_id', $mahasiswa->id)->pluck('tanggal_bimbingan')->toArray();
+        $existingDates = Bimbingan::where('mahasiswa_id', auth()->id())->pluck('tanggal_bimbingan')->toArray();
 
         $minimumBimbingan = self::MIN_BIMBINGAN;
 
@@ -270,7 +272,7 @@ class MahasiswaController extends Controller
                 'date',
                 'after_or_equal:today',
                 Rule::unique('bimbingans', 'tanggal_bimbingan')
-                    ->where(fn ($query) => $query->where('mahasiswa_id', $mahasiswa->id)),
+                    ->where(fn ($query) => $query->where('mahasiswa_id', auth()->id())),
             ],
             'waktu_bimbingan' => 'required|date_format:H:i',
             'topik_bimbingan' => 'required|string',
@@ -303,7 +305,7 @@ class MahasiswaController extends Controller
         Bimbingan::create([
             'kerja_praktek_id' => $kerjaPraktekId,
             'dosen_pembimbing_id' => $proposal->dosen_id ?? null,
-            'mahasiswa_id' => $mahasiswa->id,
+            'mahasiswa_id' => auth()->id(),
             'tanggal_bimbingan' => $request->tanggal_bimbingan,
             'waktu_bimbingan' => $request->waktu_bimbingan,
             'topik_bimbingan' => $request->topik_bimbingan,
@@ -334,12 +336,12 @@ class MahasiswaController extends Controller
     {
         $mahasiswa = auth()->user()->mahasiswa;
 
-        if ($bimbingan->mahasiswa_id != $mahasiswa->id) {
+        if ($bimbingan->mahasiswa_id != auth()->id()) {
             abort(403, 'Akses ditolak.');
         }
 
         $proposals = Proposal::where('mahasiswa_id', $mahasiswa->id)->get();
-        $existingDates = Bimbingan::where('mahasiswa_id', $mahasiswa->id)->pluck('tanggal_bimbingan')->toArray();
+        $existingDates = Bimbingan::where('mahasiswa_id', auth()->id())->pluck('tanggal_bimbingan')->toArray();
         $minimumBimbingan = self::MIN_BIMBINGAN;
 
         return view('mahasiswa.bimbingan.edit', compact('bimbingan', 'proposals', 'existingDates', 'minimumBimbingan'));
@@ -359,7 +361,7 @@ class MahasiswaController extends Controller
                 'required',
                 'date',
                 Rule::unique('bimbingans', 'tanggal_bimbingan')
-                    ->where(fn ($query) => $query->where('mahasiswa_id', $mahasiswa->id))
+                    ->where(fn ($query) => $query->where('mahasiswa_id', auth()->id()))
                     ->ignore($bimbingan->id),
             ],
             'waktu_bimbingan' => 'required|date_format:H:i',

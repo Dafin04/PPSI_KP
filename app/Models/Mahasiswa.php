@@ -32,7 +32,8 @@ class Mahasiswa extends Model
 
     public function bimbingans()
     {
-        return $this->hasMany(Bimbingan::class);
+        // FK bimbingans.mahasiswa_id mengarah ke users.id, gunakan kolom user_id sebagai local key
+        return $this->hasMany(Bimbingan::class, 'mahasiswa_id', 'user_id');
     }
 
     public function laporans()
