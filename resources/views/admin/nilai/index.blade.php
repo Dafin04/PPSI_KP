@@ -51,21 +51,25 @@
                                         <td class="px-5 py-4 text-center text-gray-800">{{ $s ?? '-' }}</td>
                                         <td class="px-5 py-4 text-center text-gray-800">{{ $l ?? '-' }}</td>
                                         <td class="px-5 py-4 text-center font-semibold text-gray-900">{{ $total ?? '-' }}</td>
-                                        <td class="px-5 py-4 text-center">
-                                            <form method="POST" action="{{ route('admin.nilai.update', $r) }}" class="inline-flex items-center gap-2">
-                                                @csrf
-                                                @method('PUT')
-                                                <select name="nilai_mutu" class="rounded-lg border-gray-200 text-sm focus:border-blue-500 focus:ring-blue-100">
-                                                    <option value="">--</option>
-                                                    @foreach(['A','B','C','D'] as $huruf)
-                                                        <option value="{{ $huruf }}" @selected($r->nilai_mutu === $huruf)>{{ $huruf }}</option>
-                                                    @endforeach
-                                                </select>
-                                                <button class="inline-flex items-center justify-center rounded-lg border border-blue-200 text-blue-700 bg-blue-50 px-3 py-1.5 text-xs font-semibold hover:bg-blue-100">
-                                                    Simpan
-                                                </button>
-                                            </form>
-                                        </td>
+                                    <td class="px-5 py-4 text-center">
+                                        @if($r->exists)
+                                        <form method="POST" action="{{ route('admin.nilai.update', $r) }}" class="inline-flex items-center gap-2">
+                                            @csrf
+                                            @method('PUT')
+                                            <select name="nilai_mutu" class="rounded-lg border-gray-200 text-sm focus:border-blue-500 focus:ring-blue-100">
+                                                <option value="">--</option>
+                                                @foreach(['A','B','C','D'] as $huruf)
+                                                    <option value="{{ $huruf }}" @selected($r->nilai_mutu === $huruf)>{{ $huruf }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button class="inline-flex items-center justify-center rounded-lg border border-blue-200 text-blue-700 bg-blue-50 px-3 py-1.5 text-xs font-semibold hover:bg-blue-100">
+                                                Simpan
+                                            </button>
+                                        </form>
+                                        @else
+                                            <span class="text-xs text-gray-400">Belum bisa rekap</span>
+                                        @endif
+                                    </td>
                                         <td class="px-5 py-4 text-center text-xs text-gray-500">
                                             @if($total)
                                                 <span class="text-green-600 font-semibold">Siap direkap</span>

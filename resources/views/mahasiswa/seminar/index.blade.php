@@ -68,9 +68,18 @@
                                                 <span class="text-gray-400">-</span>
                                             @endif
                                         </td>
-                                        <td class="px-5 py-4 text-gray-900">
-                                            <div class="font-semibold">{{ $s->pembimbingPenguji->name ?? '-' }}</div>
-                                            <div class="text-xs text-gray-500">{{ $s->pembimbingPenguji->role ?? '' }}</div>
+                                        <td class="px-5 py-4 text-gray-900 space-y-1">
+                                            <div>
+                                                <span class="text-xs text-gray-500">Ketua:</span>
+                                                <div class="font-semibold">{{ optional($s->ketuaPenguji)->name ?? '-' }}</div>
+                                            </div>
+                                            <div class="text-xs text-gray-600">
+                                                A1: {{ optional($s->anggotaPenguji1)->name ?? '-' }}<br>
+                                                A2: {{ optional($s->anggotaPenguji2)->name ?? '-' }}
+                                            </div>
+                                            <div class="text-xs text-gray-600">
+                                                Pembimbing: {{ optional($s->pembimbingPenguji)->name ?? '-' }}
+                                            </div>
                                         </td>
                                         <td class="px-5 py-4">
                                             <div class="flex items-center justify-center gap-2">

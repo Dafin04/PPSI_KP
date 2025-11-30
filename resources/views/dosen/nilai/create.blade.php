@@ -5,7 +5,7 @@
                 <div class="p-6 border-b border-gray-100">
                     <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest">Penilaian KP</p>
                     <h3 class="text-lg font-semibold text-gray-900">Input Nilai Pembimbing</h3>
-                    <p class="text-sm text-gray-500">Isi nilai pembimbing dan seminar (angka 0-100). Nilai lapangan diisi oleh PL dan rekap akhir oleh admin.</p>
+                    <p class="text-sm text-gray-500">Isi nilai pembimbing (angka 0-100). Nilai seminar hanya di menu Penguji Seminar.</p>
                 </div>
 
                 <div class="p-6">
@@ -27,11 +27,6 @@
                             <div class="space-y-2">
                                 <label class="text-sm font-semibold text-gray-800">Nilai Pembimbing</label>
                                 <input name="nilai_pembimbing" type="number" step="0.01" value="{{ old('nilai_pembimbing') }}"
-                                       class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-sm font-semibold text-gray-800">Nilai Seminar</label>
-                                <input name="nilai_seminar" type="number" step="0.01" value="{{ old('nilai_seminar') }}"
                                        class="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
                             </div>
                         </div>

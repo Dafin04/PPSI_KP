@@ -77,7 +77,7 @@
 
                             <a href="{{ route('admin.alokasi.pembimbing') }}"
                                class="flex items-center gap-3 rounded-xl px-4 py-3 border transition-all duration-200
-                                {{ request()->routeIs('admin.alokasi.pembimbing')
+                               {{ request()->routeIs('admin.alokasi.pembimbing')
                                     ? 'bg-[#1a246a] text-white border-[#1a246a] shadow-md'
                                     : 'text-gray-700 border-gray-100 hover:bg-blue-50 hover:text-[#1a246a]' }}">
                                 <span class="w-9 h-9 rounded-lg flex items-center justify-center {{ request()->routeIs('admin.alokasi.pembimbing') ? 'bg-white/20 text-white' : 'bg-blue-50 text-[#1a246a]' }}">
@@ -87,6 +87,19 @@
                                     </svg>
                                 </span>
                                 <span class="font-medium">Alokasi Dosen</span>
+                            </a>
+
+                            <a href="{{ route('admin.alokasi.penguji') }}"
+                               class="flex items-center gap-3 rounded-xl px-4 py-3 border transition-all duration-200
+                               {{ request()->routeIs('admin.alokasi.penguji')
+                                    ? 'bg-[#1a246a] text-white border-[#1a246a] shadow-md'
+                                    : 'text-gray-700 border-gray-100 hover:bg-blue-50 hover:text-[#1a246a]' }}">
+                                <span class="w-9 h-9 rounded-lg flex items-center justify-center {{ request()->routeIs('admin.alokasi.penguji') ? 'bg-white/20 text-white' : 'bg-blue-50 text-[#1a246a]' }}">
+                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h10M4 18h6" />
+                                    </svg>
+                                </span>
+                                <span class="font-medium">Penguji Seminar</span>
                             </a>
 
                             <a href="{{ route('admin.kuesioner.instansi') }}"

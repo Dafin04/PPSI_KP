@@ -82,6 +82,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/alokasi/pembimbing', [AdminController::class, 'alokasiPembimbing'])->name('alokasi.pembimbing');
     Route::post('/alokasi/pembimbing/{kerjaPraktek}', [AdminController::class, 'setPembimbing'])->name('alokasi.pembimbing.set');
     Route::get('/alokasi/penguji', [AdminController::class, 'alokasiPenguji'])->name('alokasi.penguji');
+    Route::get('/alokasi/penguji/{seminar}/detail', [AdminController::class, 'showPenguji'])->name('alokasi.penguji.detail');
     Route::post('/alokasi/penguji/{seminar}', [AdminController::class, 'setPenguji'])->name('alokasi.penguji.set');
 
     // Monitoring & laporan
@@ -175,6 +176,7 @@ Route::middleware(['auth', 'role:dosen'])->prefix('dosen')->name('dosen.')->grou
 
     // Penguji Seminar
     Route::get('/seminar', [DosenController::class, 'indexSeminar'])->name('seminar.index');
+    Route::get('/seminar/{seminar}', [DosenController::class, 'showSeminar'])->name('seminar.show');
     Route::post('/seminar/{seminar}', [DosenController::class, 'updateSeminar'])->name('seminar.update');
     Route::post('/seminar/{seminar}/approve', [DosenController::class, 'approveSeminar'])->name('seminar.approve');
     Route::post('/seminar/{seminar}/revisi', [DosenController::class, 'requestSeminarRevision'])->name('seminar.revisi');

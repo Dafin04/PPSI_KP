@@ -189,7 +189,46 @@ class AdminController extends Controller
      */
     public function nilaiIndex()
     {
-        $records = \App\Models\Nilai::with(['mahasiswa.user'])->orderByDesc('created_at')->get();
+        $records = collect();
+        $allNilai = \App\Models\Nilai::with(['mahasiswa.user'])->latest()->get();
+
+        $allNilai->groupBy(function ($n) {
+            // kunci grouping pakai user_id bila tersedia
+            return optional($n->mahasiswa)->user_id ?? $n->mahasiswa_id;
+        })->each(function ($group) use (&$records) {
+            $base = $group->first();
+            $mid = optional($base->mahasiswa)->id;
+            $uid = optional($base->mahasiswa)->user_id ?? $base->mahasiswa_id;
+
+            $nilaiPembimbing = optional($group->firstWhere('dosen_id','!=',null))->nilai_pembimbing;
+            $nilaiSeminarDosen = optional($group->firstWhere('dosen_id','!=',null))->nilai_seminar;
+            $nilaiLapangan = optional($group->firstWhere('pembimbing_lapangan_id','!=',null))->nilai_lapangan;
+
+            $seminarRecord = Seminar::where(function($q) use ($uid,$mid){
+                if ($uid) $q->where('mahasiswa_id',$uid);
+                if ($mid) $q->orWhere('mahasiswa_id',$mid);
+            })->whereNotNull('nilai_penguji_angka')->latest()->first();
+
+            $nilaiSeminar = $seminarRecord->nilai_penguji_angka ?? $nilaiSeminarDosen;
+
+            $base->nilai_pembimbing = $nilaiPembimbing;
+            $base->nilai_seminar = $nilaiSeminar;
+            $base->nilai_lapangan = $nilaiLapangan;
+            $records->push($base);
+        });
+
+        // Jika belum ada nilai sama sekali, coba isi minimal dari seminar yang sudah punya nilai penguji
+        if ($records->isEmpty()) {
+            $seminars = Seminar::with('mahasiswa')->whereNotNull('nilai_penguji_angka')->get();
+            foreach ($seminars as $sem) {
+                $stub = new \App\Models\Nilai();
+                $stub->mahasiswa_id = optional($sem->mahasiswa)->id ?? $sem->mahasiswa_id;
+                $stub->nilai_seminar = $sem->nilai_penguji_angka;
+                $stub->setRelation('mahasiswa', $sem->mahasiswa);
+                $records->push($stub);
+            }
+        }
+
         return view('admin.nilai.index', compact('records'));
     }
 
@@ -741,6 +780,19 @@ class AdminController extends Controller
         $seminar->update($validated);
 
         return back()->with('success', 'Penguji seminar berhasil diperbarui.');
+    }
+
+    /**
+     * Detail penetapan penguji seminar (tampilan form terpisah).
+     */
+    public function showPenguji(Seminar $seminar)
+    {
+        $dosens = User::where('status_aktif', true)
+            ->whereHas('roles', fn($q) => $q->where('slug','dosen'))
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.alokasi.penguji_show', compact('seminar','dosens'));
     }
 
     // Kuesioner Pembimbing Lapangan (instansi)

@@ -184,7 +184,15 @@ class DosenController extends Controller
     // CRUD Nilai (penilaian mahasiswa)
     public function indexNilai()
     {
-        $nilais = Nilai::where('dosen_id', auth()->id())->orderByDesc('created_at')->get();
+        $user = auth()->user();
+        $dosenProfile = $user->dosen ?? Dosen::firstOrCreate(
+            ['user_id' => $user->id],
+            ['nip' => $user->nip ?? '', 'jabatan' => $user->jabatan ?? '', 'status_aktif' => true]
+        );
+
+        $nilais = Nilai::where('dosen_id', $dosenProfile->id)
+            ->orderByDesc('created_at')
+            ->get();
         return view('dosen.nilai.index', compact('nilais'));
     }
 
@@ -199,14 +207,22 @@ class DosenController extends Controller
         $validated = $request->validate([
             'mahasiswa_id' => 'required|exists:mahasiswas,id',
             'nilai_pembimbing' => 'nullable|numeric|min:0|max:100',
-            'nilai_seminar' => 'nullable|numeric|min:0|max:100',
         ]);
+
+        // Pastikan dosen profile ada (karena FK nilais.dosen_id mengarah ke tabel dosens)
+        $user = auth()->user();
+        $dosenProfile = $user->dosen ?? Dosen::firstOrCreate(
+            ['user_id' => $user->id],
+            ['nip' => $user->nip ?? '', 'jabatan' => $user->jabatan ?? '', 'status_aktif' => true]
+        );
 
         $nilai = Nilai::create([
             'mahasiswa_id' => $validated['mahasiswa_id'],
-            'dosen_id' => auth()->id(),
+            'dosen_id' => $dosenProfile->id,
+            // isi dengan user dosen saat ini supaya kolom NOT NULL terpenuhi (PL tidak diinput di sini)
+            'pembimbing_lapangan_id' => auth()->id(),
             'nilai_pembimbing' => $validated['nilai_pembimbing'],
-            'nilai_seminar' => $validated['nilai_seminar'],
+            'nilai_seminar' => null,
             'nilai_pembimbing_huruf' => null,
             'nilai_seminar_huruf' => null,
             'nilai_mutu' => null,
@@ -238,12 +254,11 @@ class DosenController extends Controller
     {
         $validated = $request->validate([
             'nilai_pembimbing' => 'nullable|numeric|min:0|max:100',
-            'nilai_seminar' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $nilai->update([
             'nilai_pembimbing' => $validated['nilai_pembimbing'],
-            'nilai_seminar' => $validated['nilai_seminar'],
+            'nilai_seminar' => null,
             'nilai_pembimbing_huruf' => null,
             'nilai_seminar_huruf' => null,
         ]);
@@ -289,6 +304,11 @@ class DosenController extends Controller
         ->get();
 
         return view('dosen.seminar.index', compact('seminars'));
+    }
+
+    public function showSeminar(Seminar $seminar)
+    {
+        return view('dosen.seminar.show', compact('seminar'));
     }
 
     public function approveSeminar(Request $request, Seminar $seminar)
@@ -367,6 +387,12 @@ class DosenController extends Controller
 
         if (!is_null($nilaiPenguji['angka']) || !is_null($nilaiPenguji['huruf'])) {
             $seminar->setPengujiGrade($nilaiPenguji['angka'], $nilaiPenguji['huruf']);
+        }
+
+        // Tandai selesai jika nilai final sudah diisi
+        if (!is_null($nilaiPenguji['angka'])) {
+            $seminar->status = 'selesai';
+            $seminar->save();
         }
 
         $seminar->hitungNilaiAkhir();

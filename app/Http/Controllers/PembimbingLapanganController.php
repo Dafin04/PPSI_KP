@@ -40,12 +40,16 @@ class PembimbingLapanganController extends Controller
 
     public function createNilai()
     {
-        $mahasiswaIds = \App\Models\KerjaPraktek::where('instansi_id', auth()->user()->instansi_id ?? null)
-            ->pluck('mahasiswa_id')
-            ->unique();
-        $mahasiswaList = \App\Models\Mahasiswa::with('user')
-            ->whereIn('user_id', $mahasiswaIds)
-            ->get();
+        $instansiId = auth()->user()->instansi_id ?? optional(auth()->user()->pembimbingLapangan)->instansi_id;
+        $mahasiswaList = collect();
+        if ($instansiId) {
+            $mahasiswaIds = \App\Models\KerjaPraktek::where('instansi_id', $instansiId)
+                ->pluck('mahasiswa_id')
+                ->unique();
+            $mahasiswaList = \App\Models\Mahasiswa::with('user')
+                ->whereIn('user_id', $mahasiswaIds)
+                ->get();
+        }
         return view('pembimbing-lapangan.nilai.create', compact('mahasiswaList'));
     }
 
@@ -56,23 +60,26 @@ class PembimbingLapanganController extends Controller
             'nilai_lapangan' => 'nullable|numeric|min:0|max:100',
         ]);
 
+        // temukan profil mahasiswa dan KP terkait
+        $m = \App\Models\Mahasiswa::where('user_id', $validated['mahasiswa_id'])->first();
+        $kp = $m ? \App\Models\KerjaPraktek::where('mahasiswa_id', $m->user_id)->latest()->first() : null;
+        // ambil profil dosen pembimbing (untuk memenuhi FK dosen_id)
+        $dosenProfileId = null;
+        if ($kp && $kp->dosen_pembimbing_id) {
+            $dosenProfileId = \App\Models\Dosen::where('user_id', $kp->dosen_pembimbing_id)->value('id');
+        }
+
         $nilai = Nilai::create([
-            'mahasiswa_id' => $validated['mahasiswa_id'],
-            'dosen_id' => null,
+            'mahasiswa_id' => $m?->id ?? $validated['mahasiswa_id'],
+            'dosen_id' => $dosenProfileId, // boleh null jika tidak ada
             'pembimbing_lapangan_id' => auth()->id(),
             'nilai_lapangan' => $validated['nilai_lapangan'],
         ]);
 
-        // Sinkronkan ke KP (asumsikan mahasiswa_id merujuk ke tabel mahasiswas)
-        $m = \App\Models\Mahasiswa::find($validated['mahasiswa_id']);
-        if ($m) {
-            $kp = \App\Models\KerjaPraktek::where('mahasiswa_id', $m->user_id)
-                ->orderByDesc('created_at')->first();
-            if ($kp && !is_null($validated['nilai_lapangan'] ?? null)) {
-                $kp->nilai_pengawas_lapangan = $validated['nilai_lapangan'];
-                $kp->save();
-                $kp->hitungNilaiAkhir();
-            }
+        if ($kp && !is_null($validated['nilai_lapangan'] ?? null)) {
+            $kp->nilai_pengawas_lapangan = $validated['nilai_lapangan'];
+            $kp->save();
+            $kp->hitungNilaiAkhir();
         }
 
         return redirect()->route('lapangan.nilai.index')->with('success', 'Nilai lapangan ditambahkan.');
